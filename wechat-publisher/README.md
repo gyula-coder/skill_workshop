@@ -60,8 +60,7 @@ wechat-publisher/
 │   └── image-styles/           # 9 套配图风格(.json + previews/*.webp)
 ├── references/
 │   ├── api_reference.md        # 脚本与生图 provider 参考
-│   ├── evolink-api.md          # Evolink API 参考
-│   └── setup-local.md          # 本地配置说明
+│   └── evolink-api.md          # Evolink API 参考
 ├── brief.md.example            # newspic 贴图模式 brief 模板
 └── tests/                      # pytest 测试套件(不依赖真实微信凭证)
 ```
@@ -93,6 +92,8 @@ pip install requests pyyaml --break-system-packages
 
 ```yaml
 default: main
+output_dir: "./output"
+
 accounts:
   main:
     name: "我的公众号"
@@ -103,9 +104,9 @@ accounts:
 image_generation:
   generator: "baoyu-image-gen"
   gemini_proxy:
-    base_url: "https://website-data-analysis.replit.app"
-    api_key: "cr_..."
-    image_model: "gemini-3-pro-image-preview"
+    base_url: ""
+    api_key: ""
+    image_model: "gemini-2.5-flash"
 
 integrations:
   wechatsync_mcp_token: ""
@@ -454,17 +455,18 @@ image_generation:
   generator: "baoyu-image-gen"
   gemini_proxy:
     base_url: "https://cli.sora.locker/"
-    api_key: "sk-..."
+    api_key: ""
     image_model: "gemini-2.5-flash"
 ```
 
 切换到 Web 登录版 Gemini:
 
 ```yaml
-accounts:
-  main:
-    image_generator: "baoyu-danger-gemini-web"
+image_generation:
+  generator: "baoyu-danger-gemini-web"
 ```
+
+如需只给某个账号覆盖生图后端,也可以在该账号下配置 `image_generator`。
 
 也可单次命令覆盖:
 

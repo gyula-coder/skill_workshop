@@ -46,7 +46,7 @@ Content-Type: application/json
 
 ```json
 {
-  "status": "completed",
+  "status": "succeeded",
   "progress": 100,
   "result_data": [
     { "url": "https://files.evolink.ai/..." }
@@ -60,7 +60,6 @@ Content-Type: application/json
 
 | 问题 | 现象 | 处理方式 |
 |---|---|---|
-| **状态名是 `completed`**,不是常见的 `succeeded` | 轮询永远不终止,直到超时 | 检查 `"completed" \|\| "succeeded"` |
 | **图片 URL 在 `result_data` 里**,不在 `output` 里 | 永远拿不到 URL | 读 `result_data[0].url`,兜底 `results[0]` |
 | **输出是 WebP 格式** | WeChat API 报 `invalid image format` | 用 Pillow 转 PNG: `img = Image.open(path); img.save(path, 'PNG')` |
 | **图片 URL 有效期有限** | 存储前的临时链接 | 拿到后立即下载到本地文件 |
@@ -71,6 +70,6 @@ Content-Type: application/json
 
 1. POST 提交任务,拿到 `task_id`
 2. 每 **2 秒**轮询 `GET /v1/tasks/{task_id}`
-3. 检查 `status === "completed"`,从 `result_data[0].url` 取图
+3. 检查 `status === "succeeded"`,从 `result_data[0].url` 取图
 4. 立即下载到本地文件
 5. 超时 120 秒

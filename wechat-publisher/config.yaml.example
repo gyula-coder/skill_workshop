@@ -3,6 +3,7 @@
 # 注意:真实文件包含密钥,已被 .gitignore 忽略,不要提交。
 
 default: main
+output_dir: "./output"
 
 accounts:
   main:
@@ -16,7 +17,8 @@ accounts:
     voice: |
       飞哥，独立开发者，专注 AI 与效率工具。
       微信公众号：某某号。
-    sync_platforms: [zhihu, juejin, csdn]
+    # 可选:多平台同步默认目标。默认不启用,发布时需显式传 --sync-from-config。
+    # sync_platforms: [zhihu, juejin, csdn]
 
   tech:
     name: "技术博客号"
@@ -35,22 +37,29 @@ image_generation:
 
   # baoyu-image-gen / provider=openai
   openai:
-    api_key: "sk-..."
+    api_key: ""
     base_url: "https://api.openai.com/v1"
     image_model: "gpt-image-1"
 
   # baoyu-image-gen / provider=gemini-proxy
   gemini_proxy:
-    base_url: "https://website-data-analysis.replit.app"
-    api_key: "cr_..."
-    image_model: "gemini-3-pro-image-preview"
+    base_url: ""
+    api_key: ""
+    image_model: "gemini-2.5-flash"
+
+  # baoyu-image-gen / provider=evolink
+  evolink:
+    api_key: ""
+    base_url: "https://api.evolink.ai/v1"
+    image_model: "z-image-turbo"
 
   # baoyu-danger-gemini-web
   gemini_web:
-    # data_dir: "/Users/you/Library/Application Support/baoyu-skills/gemini-web"
-    # cookie_path: "/Users/you/Library/Application Support/baoyu-skills/gemini-web/cookies.json"
-    # chrome_profile_dir: "/Users/you/Library/Application Support/baoyu-skills/gemini-web/chrome-profile"
-    # chrome_path: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+    # 可选:如需固定 Web Gemini 会话目录,优先使用相对路径或用户自行填写的本机路径。
+    # data_dir: "./gemini-web"
+    # cookie_path: "./gemini-web/cookies.json"
+    # chrome_profile_dir: "./gemini-web/chrome-profile"
+    # chrome_path: ""
 
 integrations:
   # 多平台同步: @wechatsync/cli + Chrome 扩展 MCP token

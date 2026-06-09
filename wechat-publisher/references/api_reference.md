@@ -14,7 +14,7 @@
 **Evolink 异步流程**:
 1. `POST /v1/images/generations` → 返回 `{ id: "task-xxx", status: "processing" }`
 2. 每 2s 轮询 `GET /v1/tasks/{task_id}`
-3. 状态 `"completed"` 时从 `result_data[0].url` 取图
+3. 状态 `"succeeded"` 时从 `result_data[0].url` 取图
 4. 立即下载图片到本地文件
 5. 超时 120 秒
 

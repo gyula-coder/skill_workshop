@@ -1,7 +1,7 @@
 ---
 name: github-trending-report
 description: "生成 GitHub Trending 中文趋势报告，支持日报、周报、月报；抓取榜单项目并输出面向公众号或 Markdown 的分析文章。"
-version: 1.1.0
+version: 1.2.0
 tags: [github, trending, daily, weekly, monthly, report, blog, wechat, analysis]
 ---
 
@@ -237,13 +237,64 @@ tags: [github, trending, daily, weekly, monthly, report, blog, wechat, analysis]
 
 ## 定时任务配置
 
-是否支持定时任务、字段名怎么写，取决于具体运行这个 skill 的 agent 或调度器。这个 skill 只约定任务意图，不绑定某个产品的调度 schema。
+### Hermes Agent 定时任务（cronjob 工具）
 
-建议任务文案：
+在 Hermes Agent 中，使用 `cronjob` 工具创建持久化定时任务。关键参数：
 
-- 日报：`按照 github-trending-report skill 生成今日 GitHub Trending 日报；如用户要求，再发布到微信公众号草稿箱。`
-- 周报：`按照 github-trending-report skill 生成本期 GitHub Trending 周报；如用户要求，再发布到微信公众号草稿箱。`
-- 月报：`按照 github-trending-report skill 生成过去 30 日 GitHub Trending 月报；如用户要求，再发布到微信公众号草稿箱。`
+| 参数 | 值 | 说明 |
+|------|-----|------|
+| `schedule` | cron 表达式 | 日报 `0 9 * * *`，周报 `0 10 * * 1`，月报 `0 10 1 * *` |
+| `skills` | `["github-trending-report"]` | 加载此 skill |
+| `workdir` | skill 根目录的绝对路径 | 让 publish.py 能通过相对路径找到 `config.yaml` |
+| `prompt` | 自包含的任务指令 | 见下文 |
+
+### 三个周期性任务的创建模板
+
+创建时使用 `cronjob(action='create')`，以下是经过实测的参数模板：
+
+**日报（每天 9:00）：**
+```json
+{
+  "name": "GitHub Trending 日报自动发布",
+  "schedule": "0 9 * * *",
+  "skills": ["github-trending-report"],
+  "workdir": "/绝对路径/to/github-trending-report",
+  "prompt": "按照 github-trending-report skill 的流程，执行以下步骤生成今日 GitHub Trending 日报并发布到微信公众号草稿箱：\n\n1. 读取 config.yaml，确认公众号账号「小神仙」的 app_id/app_secret 已配置\n2. 用浏览器打开 https://github.com/trending?since=daily 抓取 top 10 项目数据\n3. 按照 skill 的「输出格式」规范撰写日报\n4. 保存到输出目录（config.yaml 中的 report.output_root）/daily/trending_daily_{今天日期}.md\n5. 调用 scripts/publish.py 发布到公众号草稿箱\n\n注意：今天是指 cron 运行的当天日期。"
+}
+```
+
+**周报（每周一 10:00）：**
+```json
+{
+  "name": "GitHub Trending 周报自动发布",
+  "schedule": "0 10 * * 1",
+  "skills": ["github-trending-report"],
+  "workdir": "/绝对路径/to/github-trending-report",
+  "prompt": "按照 github-trending-report skill 的流程，执行以下步骤生成本期 GitHub Trending 周报并发布到微信公众号草稿箱：\n\n1. 读取 config.yaml，确认公众号账号「小神仙」的 app_id/app_secret 已配置\n2. 用浏览器打开 https://github.com/trending?since=weekly 抓取 top 15 项目数据\n3. 按照 skill 的「输出格式」规范撰写周报——每个项目保留完整深度分析，并添加「本期视角」「领域速览」「连续上榜标注」三个增强章节\n4. 保存到输出目录（config.yaml 中的 report.output_root）/weekly/trending_weekly_{今天日期}.md\n5. 调用 scripts/publish.py 发布到公众号草稿箱\n\n注意：今天是指 cron 运行的当天日期。"
+}
+```
+
+**月报（每月 1 日 10:00）：**
+```json
+{
+  "name": "GitHub Trending 月报自动发布",
+  "schedule": "0 10 1 * *",
+  "skills": ["github-trending-report"],
+  "workdir": "/绝对路径/to/github-trending-report",
+  "prompt": "按照 github-trending-report skill 的流程，执行以下步骤生成过去30日 GitHub Trending 月报并发布到微信公众号草稿箱：\n\n1. 读取 config.yaml，确认公众号账号「小神仙」的 app_id/app_secret 已配置\n2. 用浏览器打开 https://github.com/trending?since=monthly 抓取 top 20 项目数据，可精选 10-15 个做深度分析，剩余放到潜力项目\n3. 按照 skill 的「输出格式」规范撰写月报——每个项目保留完整深度分析，并添加「本期视角」「领域速览」「连续上榜标注」三个增强章节；分析更重，少关注单日噪声，加入更强的趋势判断\n4. 保存到输出目录（config.yaml 中的 report.output_root）/monthly/trending_monthly_{今天日期}.md\n5. 调用 scripts/publish.py 发布到公众号草稿箱\n\n注意：今天是指 cron 运行的当天日期。"
+}
+```
+
+### 手动测试周报/月报（重要）
+
+不要依赖 `cronjob(action='run')` 来验证定时任务——实测发现它不会立即执行任务。正确的测试方式是在当前会话中按 skill 流程手动跑一遍：
+
+1. 用 `browser_navigate` 打开 GitHub Trending 对应周期页面
+2. 用 `browser_console` 的 `expression` 参数（IIFE + 返回值）提取数据
+3. 按格式写报告，保存到指定输出目录
+4. 直接调用 `scripts/publish.py` 发布到公众号草稿箱
+
+`workdir` 必须设为 skill 根目录的绝对路径，否则 `publish.py` 无法通过相对路径找到 `config.yaml`。
 
 ## 相关文件
 

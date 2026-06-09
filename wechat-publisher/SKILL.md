@@ -17,18 +17,16 @@ description: |
 
 本 skill 实现从素材输入到公众号草稿箱的完整自动化流程。核心价值:用户只需提供一个话题或几篇参考资料,skill 自动完成搜索调研、撰写、生成配图、排版、AI 味自检、发布。
 
-> **⚠️ 不要使用 `baoyu-post-to-wechat` skill。** 本 skill 是自研的完整发布管线,和 `baoyu-post-to-wechat` 功能有重合但行为不同(本 skill 带多账号 / 主题排版 / 反 AI 检测 gate)。如果 Claude 路由时同时看到两者,**明确选本 skill(`wechat-publisher`)**,不要调用 `baoyu-post-to-wechat`。
-
 ## 账号与人格
 
-目前配置了 2 个账号(见 `config.yaml`):
+`config.yaml.example` 保留了 2 个示例账号。真实可用账号以 `config.yaml` 为准:
 
 | key | 公众号名 | 作者 | 主题 | 人格(voice) |
 |---|---|---|---|---|
 | `main`(默认) | 刷屏AI | **飞哥** | `refined-blue` | 热情、类比、北京口语、爱讲踩坑经历。面向 AI 产品 / 提示工程 / Agent / 个人生产力 |
 | `tech` | 蒜是哪根葱 | **葱哥** | `minimal-mono` | 技术直男味、冷幽默、不用感叹号、爱命令行和 commit hash。面向工程实践 / SDK / CLI / 底层原理 |
 
-**默认作者**:不指定 `--account` 时用 `main`(飞哥 + refined-blue)。使用 `--account tech` 时自动切到葱哥 + minimal-mono 主题。
+**默认作者**:不指定 `--account` 时用 `config.yaml` 的 `default` 账号。示例配置里 `main` 是飞哥 + refined-blue,使用 `--account tech` 时切到葱哥 + minimal-mono 主题。
 
 写作时**必须按当前账号的 voice 字段改写语气**,不同账号写出来要有明显的风格差异 —— 这本身就是反 AI 检测的关键(平台会对每个号建立历史文风基线,突然风格统一化就是 AI 信号)。
 
@@ -61,6 +59,7 @@ cp config.yaml.example config.yaml
 
 ```yaml
 default: main
+output_dir: "./output"
 
 accounts:
   main:
@@ -75,13 +74,17 @@ accounts:
 image_generation:
   generator: "baoyu-image-gen"
   gemini_proxy:
-    base_url: "https://website-data-analysis.replit.app"
-    api_key: "cr_..."
-    image_model: "gemini-3-pro-image-preview"
+    base_url: ""
+    api_key: ""
+    image_model: "gemini-2.5-flash"
 
 integrations:
   wechatsync_mcp_token: ""
 ```
+
+`output_dir` 是所有文章中间产物和归档产物的根目录。后文统一用 `<output_dir>` 表示它;可以写相对路径,也可以写用户自己机器上的绝对路径。
+
+如果缺少 `config.yaml`、账号不存在、或账号缺少 `app_id` / `app_secret`,agent 必须先提示用户补齐或确认配置,不要伪造凭证继续执行发布。
 
 #### 2) 生图后端选择
 
@@ -123,7 +126,7 @@ image_generation:
 
   # Evolink — 最便宜 ($0.0038/张),异步轮询
   evolink:
-    api_key: "sk-..."
+    api_key: ""
     base_url: "https://api.evolink.ai/v1"
     image_model: "z-image-turbo"
 
@@ -186,7 +189,7 @@ pip install requests pyyaml --break-system-packages 2>/dev/null || pip install r
 
 3. **选择文章结构**:写作前先确定 `article_structure` 和 `opening_hook`。用户指定则照做;未指定时先按题材匹配,有多个候选就随机选一个;批量写多篇时避免连续两篇使用同一结构。
 
-4. **产出**:写入 `/Users/suoer/iCloud/Documents/wechat-mp/<main|tech>/<YYYY-MM-DD>-<slug>/brief.md`,包含话题、目标账号、3-5 个关键词、用户提供的真实细节清单、`article_structure`、`opening_hook`。
+4. **产出**:写入 `<output_dir>/<account>/<YYYY-MM-DD>-<slug>/brief.md`,包含话题、目标账号、3-5 个关键词、用户提供的真实细节清单、`article_structure`、`opening_hook`。
 
 ---
 
@@ -207,7 +210,7 @@ pip install requests pyyaml --break-system-packages 2>/dev/null || pip install r
 
 3. **信息筛选与交叉验证**:关键数据多源交叉,具体到数字 / 名字 / 时间 / 产品版本号。
 
-4. **产出**:`/Users/suoer/iCloud/Documents/wechat-mp/<main|tech>/<slug>/research.md`,每个素材标来源,区分"权威层"和"真人层"。
+4. **产出**:`<output_dir>/<account>/<YYYY-MM-DD>-<slug>/research.md`,每个素材标来源,区分"权威层"和"真人层"。
 
 ---
 
@@ -622,7 +625,7 @@ python3 scripts/publish.py ... --skip-ai-score
 写作时还是推荐显式跑一次 `ai_score.py` 看细节报告:
 
 ```bash
-python3 scripts/ai_score.py /Users/suoer/iCloud/Documents/wechat-mp/<main|tech>/<slug>/article.md --threshold 45
+python3 scripts/ai_score.py <output_dir>/<account>/<YYYY-MM-DD>-<slug>/article.md --threshold 45
 ```
 
 输出示例:
@@ -669,8 +672,8 @@ python3 scripts/ai_score.py /Users/suoer/iCloud/Documents/wechat-mp/<main|tech>/
 ```bash
 python3 scripts/publish.py \
   --account <main|tech> \
-  --input /Users/suoer/iCloud/Documents/wechat-mp/<main|tech>/<slug>/article.md \
-  --cover /Users/suoer/iCloud/Documents/wechat-mp/<main|tech>/<slug>/cover.jpg \
+  --input <output_dir>/<account>/<YYYY-MM-DD>-<slug>/article.md \
+  --cover <output_dir>/<account>/<YYYY-MM-DD>-<slug>/cover.jpg \
   --title "文章标题" \
   --digest "120 字以内摘要"
 ```
@@ -726,8 +729,8 @@ python3 scripts/publish.py --account tech --html article.html --cover cover.jpg 
 **方式 A:命令行显式指定平台(最常用)**
 ```bash
 python3 scripts/publish.py --account main \
-  --input /Users/suoer/iCloud/Documents/wechat-mp/main/<slug>/article.md \
-  --cover /Users/suoer/iCloud/Documents/wechat-mp/main/<slug>/cover.jpg \
+  --input <output_dir>/main/<YYYY-MM-DD>-<slug>/article.md \
+  --cover <output_dir>/main/<YYYY-MM-DD>-<slug>/cover.jpg \
   --sync zhihu,juejin,csdn
 ```
 
@@ -756,7 +759,7 @@ python3 scripts/multi_publish.py --input x.md --platforms zhihu,juejin
 因此同步走的是**原始 markdown**(`article.md`),不是已处理过的版本。
 
 - 外部 URL 图片(HTTPS):wechatsync 自动转存到各平台,通常没问题
-- 本地路径图片(比如 `/Users/suoer/iCloud/Documents/wechat-mp/main/<slug>/images/fig1.png`):wechatsync 的文档未明确是否支持
+- 本地路径图片(比如 `<output_dir>/main/<YYYY-MM-DD>-<slug>/images/fig1.png`):wechatsync 的文档未明确是否支持
   - `multi_publish.py` 会扫出并提示有多少张本地图
   - 如果目标平台发现图加载不出来,需要把本地图先传到公开图床(或任何无防盗链的 CDN)、改成 URL 后再跑同步
 
@@ -900,9 +903,15 @@ python3 scripts/publish.py --account main --type newspic --brief brief.md --imag
 
 所有生成的文件(包括中间产物和最终归档)都放在:
 
+`<output_dir>` 来自 `config.yaml` 顶层字段:
+
+```yaml
+output_dir: "./output"
+```
+
 **图文(news)布局**:
 ```
-/Users/suoer/iCloud/Documents/wechat-mp/<main|tech>/<YYYY-MM-DD>-<slug>/
+<output_dir>/<account>/<YYYY-MM-DD>-<slug>/
   ├── brief.md            # 阶段一的需求摘要
   ├── research.md         # 阶段二的搜索素材
   ├── article.md          # 阶段三/3.5 的文章(最终发布源)
@@ -914,7 +923,7 @@ python3 scripts/publish.py --account main --type newspic --brief brief.md --imag
 
 **贴图(newspic)布局**:
 ```
-/Users/suoer/iCloud/Documents/wechat-mp/<main|tech>/<YYYY-MM-DD>-<slug>/
+<output_dir>/<account>/<YYYY-MM-DD>-<slug>/
   ├── brief.md            # 话题 + 要点 + 短文本(发布源)
   ├── card_plan.json      # newspic_build.py 产出的每张卡的 prompt + 目标文件名
   └── images/
@@ -923,14 +932,14 @@ python3 scripts/publish.py --account main --type newspic --brief brief.md --imag
       └── ...
 ```
 
-- `<main|tech>` 按目标账号选:`main` 账号 → `main/` 文件夹,`tech` 账号 → `tech/` 文件夹
+- `<account>` 按目标账号选:示例配置里 `main` 账号 → `main/` 文件夹,`tech` 账号 → `tech/` 文件夹
 - `<YYYY-MM-DD>-<slug>` 格式:日期 + 短横线 + 语义化 slug(纯小写英文短横线分隔)
 - 各阶段的命令和路径都要相应调整,例如:
   ```bash
-  python3 scripts/ai_score.py /Users/suoer/iCloud/Documents/wechat-mp/main/<slug>/article.md --threshold 45
+  python3 scripts/ai_score.py <output_dir>/main/<YYYY-MM-DD>-<slug>/article.md --threshold 45
   python3 scripts/publish.py --account main \
-    --input /Users/suoer/iCloud/Documents/wechat-mp/main/<slug>/article.md \
-    --cover /Users/suoer/iCloud/Documents/wechat-mp/main/<slug>/cover.jpg \
+    --input <output_dir>/main/<YYYY-MM-DD>-<slug>/article.md \
+    --cover <output_dir>/main/<YYYY-MM-DD>-<slug>/cover.jpg \
     --title "..."
   ```
 
@@ -979,4 +988,3 @@ python3 scripts/publish.py --account main --type newspic --brief brief.md --imag
 - 正文图片通过 `uploadimg` 接口上传,不占永久素材名额
 - 如无封面图,使用文章第一张配图作为封面
 - 所有配图统一使用项目内置 `scripts/generate_image.py` 生成的手绘蓝色信息图(不混用实拍图)
-- **不要调用 `baoyu-post-to-wechat` skill**,一律用本 skill 的 publish.py
