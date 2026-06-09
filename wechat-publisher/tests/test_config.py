@@ -23,7 +23,7 @@ def test_get_config_default_account(tmp_config_yaml):
     cfg = config.get_config()
     assert cfg["account_key"] == "main"
     assert cfg["app_id"] == "wx_fake_main_app_id_0001"
-    assert cfg["author"] == "飞哥"
+    assert cfg["author"] == "Main Author"
     assert cfg["theme"] == "refined-blue"
 
 
@@ -34,7 +34,7 @@ def test_get_config_explicit_account(tmp_config_yaml):
     cfg = config.get_config("tech")
     assert cfg["account_key"] == "tech"
     assert cfg["app_id"] == "wx_fake_tech_app_id_0002"
-    assert cfg["author"] == "葱哥"
+    assert cfg["author"] == "Tech Author"
     assert cfg["theme"] == "minimal-mono"
 
 
@@ -48,7 +48,7 @@ def test_unified_config_reads_wechat_publisher_yaml(tmp_path, monkeypatch):
             name: "Unified Main"
             app_id: "wx_unified"
             app_secret: "unified_secret"
-            author: "飞哥"
+            author: "Main Author"
             theme: "refined-blue"
         image_generation:
           generator: "baoyu-danger-gemini-web"
@@ -86,7 +86,7 @@ def test_load_env_reads_unified_image_and_integration_config(tmp_path, monkeypat
             name: "Unified Main"
             app_id: "wx_unified"
             app_secret: "unified_secret"
-            author: "飞哥"
+            author: "Main Author"
         image_generation:
           generator: "baoyu-image-gen"
           openai:
@@ -248,4 +248,3 @@ def test_sync_platforms_none_when_missing(write_config_yaml):
 
     cfg = config.get_config()
     assert cfg["sync_platforms"] is None
-

@@ -14,9 +14,26 @@ accounts:
     theme: "refined-blue"
     image_style: "hand-drawn-blue"
     newspic_image_style: "infographic-warm"
-    voice: |
-      飞哥，独立开发者，专注 AI 与效率工具。
-      微信公众号：某某号。
+    voice: "独立开发者，专注 AI 与效率工具。表达热情、口语化，善用类比，喜欢写真实踩坑和具体使用感受。"
+    positioning: "AI 产品、提示词、Agent、效率工具与深度体验分享。"
+    topic_scope:
+      prefer: ["AI 产品", "提示工程", "Agent", "效率工具", "产品拆解", "真实使用体验"]
+      avoid: ["过冷的 SDK 细节", "纯命令行教程", "底层协议逐行讲解"]
+    voice_traits: ["热情", "口语化", "善用类比", "可以写个人踩坑", "能带一点自嘲"]
+    writing_rules:
+      - "优先讲清楚这东西对普通用户或产品使用者有什么用。"
+      - "多写真实场景、上手体验、取舍判断和踩坑细节。"
+      - "少写成教科书总结体，避免过度抽象。"
+    theme_notes: "默认 refined-blue；适合 AI / 产品 / 深度分析。"
+    image_style_notes:
+      article_default: "hand-drawn-blue：文章级安全默认，适合概念解释、产品拆解和工程说明。"
+      newspic_default: "infographic-warm：贴图默认，高密度手绘水彩信息图。"
+      optional:
+        illustrated-warm: "讲使用体验、故事卡、亲切感强的指南时可选。"
+        xiaohongshu-colorful: "生活向、入门指南、清单类内容可选。"
+    style_preferences:
+      tone: "更口语、更有人味，允许类比、反问和个人判断。"
+      visual: "蓝调、手绘、暖色信息图优先。"
     # 可选:多平台同步默认目标。默认不启用,发布时需显式传 --sync-from-config。
     # sync_platforms: [zhihu, juejin, csdn]
 
@@ -24,12 +41,32 @@ accounts:
     name: "技术博客号"
     app_id: "wx0987654321fedcba"
     app_secret: "another_app_secret"
-    author: "技术团队"
+    author: "葱哥"
     theme: "minimal-mono"
     image_style: "tech-card-blue"
     newspic_image_style: "infographic-blue"
-    voice: |
-      技术团队，持续输出工程实践。
+    voice: "后端开发，技术细节控。表达克制、短句多、少修辞，偏工程实践、命令行和可复现细节。"
+    positioning: "工程实践、SDK、CLI、底层原理与技术细节复盘。"
+    topic_scope:
+      prefer: ["工程实践", "SDK", "CLI", "底层原理", "命令行工具", "可复现技术细节"]
+      avoid: ["过度生活化清单", "小红书式轻内容", "泛泛而谈的产品体验"]
+    voice_traits: ["克制", "短句", "少修辞", "有命令行感", "冷一点", "可以冷吐槽"]
+    writing_rules:
+      - "优先写清楚环境、版本、命令、错误信息和复现路径。"
+      - "少铺情绪，多给判断依据和工程取舍。"
+      - "适合用 commit hash、命令片段、日志和边界条件增强真实感。"
+    theme_notes: "默认 minimal-mono；适合技术 / SDK / 工程文章。"
+    image_style_notes:
+      article_default: "tech-card-blue：浅蓝底极简大字卡，适合技术技巧、命令讲解、短观点。"
+      newspic_default: "infographic-blue：冷蓝高密度信息图，适合 SDK、协议、产品拆解。"
+      optional:
+        quote-card-minimal: "观点金句、哲思、收尾页可选；冷、静、有分量。"
+        meme-illustration: "文末吐槽或轻松转场可偶尔使用。"
+      avoid:
+        xiaohongshu-colorful: "不适合严肃技术深度稿。"
+    style_preferences:
+      tone: "更克制、更短句，少修辞，允许冷吐槽。"
+      visual: "极简、冷蓝、黑白、技术感优先。"
 
 image_generation:
   # 默认 baoyu-image-gen; 如需使用 Web 登录版 Gemini,改为 baoyu-danger-gemini-web

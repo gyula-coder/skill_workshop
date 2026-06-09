@@ -99,7 +99,11 @@ accounts:
     name: "我的公众号"
     app_id: "wx..."
     app_secret: "..."
-    author: "飞哥"
+    author: "文章作者"
+    theme: "<theme-name>"
+    image_style: "<article-image-style>"
+    newspic_image_style: "<newspic-image-style>"
+    voice: "这个账号的写作语气和表达边界。"
 
 image_generation:
   generator: "baoyu-image-gen"
@@ -309,12 +313,12 @@ python3 scripts/ai_score.py article.md --threshold 45
 <td width="50%">
 <img src="assets/theme-previews/screenshots/refined-blue.webp" alt="refined-blue preview" />
 <br />
-<code>refined-blue</code> · main 默认,适合 AI / 产品 / 深度分析
+<code>refined-blue</code> · 适合 AI / 产品 / 深度分析
 </td>
 <td width="50%">
 <img src="assets/theme-previews/screenshots/minimal-mono.webp" alt="minimal-mono preview" />
 <br />
-<code>minimal-mono</code> · tech 默认,适合技术 / 工程文章
+<code>minimal-mono</code> · 适合技术 / 工程文章
 </td>
 </tr>
 <tr>
@@ -335,8 +339,8 @@ python3 scripts/ai_score.py article.md --threshold 45
 
 | 类别 | 推荐主题 | 视觉关键词 |
 |---|---|---|
-| **AI / 产品 / 深度分析** | `refined-blue` **(main 默认)** · `business-navy` · `sage-premium` | 蓝调 / 深蓝金 / 鼠尾草绿 |
-| **技术 / SDK / 工程** | `minimal-mono` **(tech 默认)** · `minimal-bw` · `academic-paper` · `cyber-neon` | 等宽 / 黑白 / 论文衬线 / 赛博霓虹 |
+| **AI / 产品 / 深度分析** | `refined-blue` · `business-navy` · `sage-premium` | 蓝调 / 深蓝金 / 鼠尾草绿 |
+| **技术 / SDK / 工程** | `minimal-mono` · `minimal-bw` · `academic-paper` · `cyber-neon` | 等宽 / 黑白 / 论文衬线 / 赛博霓虹 |
 | **新闻 / 热点 / 速读** | `news-bold` · `warm-editorial` | 红黑强对比 / 栗色暖调 |
 | **人文 / 随笔 / 文化** | `ink-wash` · `elegant-ink` · `magazine-grid` | 米黄朱砂 / 墨黑朱砂 / 杂志衬线 |
 | **生活 / 美食 / 旅行** | `warm-orange` · `mint-fresh` · `sunset-coral` | 暖橙 / 薄荷 / 珊瑚 |

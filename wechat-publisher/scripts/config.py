@@ -210,6 +210,13 @@ def get_config(account_name: Optional[str] = None) -> Dict[str, Any]:
             "image_generator": str,
             "voice": str,
             "sync_platforms": list[str] | None,   # 可选,未配置为 None
+            "positioning": str,
+            "topic_scope": dict,
+            "voice_traits": list[str],
+            "writing_rules": list[str],
+            "theme_notes": str,
+            "image_style_notes": dict,
+            "style_preferences": dict,
         }
     """
     account_name = account_name or _active_account
@@ -268,6 +275,13 @@ def get_config(account_name: Optional[str] = None) -> Dict[str, Any]:
         "newspic_image_style": acc.get("newspic_image_style", "") or "",
         "image_generator": acc.get("image_generator", "") or image_generation.get("generator", "") or "",
         "voice": acc.get("voice", "") or "",
+        "positioning": acc.get("positioning", "") or "",
+        "topic_scope": acc.get("topic_scope") or {},
+        "voice_traits": acc.get("voice_traits") or [],
+        "writing_rules": acc.get("writing_rules") or [],
+        "theme_notes": acc.get("theme_notes", "") or "",
+        "image_style_notes": acc.get("image_style_notes") or {},
+        "style_preferences": acc.get("style_preferences") or {},
         "sync_platforms": sync_platforms,
     }
 
