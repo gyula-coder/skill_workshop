@@ -1,0 +1,13 @@
+# GitHub Trending Report 微信公众号草稿发布配置示例
+# 复制为本 skill 根目录下的 config.yaml。
+# 注意: 真实文件包含密钥,不要提交或共享。
+
+default: 小神仙
+
+accounts:
+  小神仙:
+    name: "小神仙"
+    app_id: "wx1234567890abcdef"
+    app_secret: "your_app_secret_here"
+    author: "小神仙"
+    theme: "github-trending"

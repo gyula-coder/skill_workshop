@@ -1,0 +1,58 @@
+{
+  "theme_name": "github-trending",
+  "description": "GitHub Trending - 适合开源趋势日报、周报、月报的清爽技术分析主题",
+  "styles": {
+    "body": "font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; font-size: 15.5px; color: #20242d; line-height: 1.82; letter-spacing: 0.2px; word-spacing: 1px; padding: 20px 22px; background: #ffffff;",
+    "h1": "font-size: 23px; font-weight: 800; color: #111827; text-align: left; margin: 32px 0 20px; padding: 0 0 12px 0; border-bottom: 2px solid #111827; line-height: 1.4;",
+    "h2": "font-size: 18px; font-weight: 800; color: #111827; margin: 38px 0 16px; padding: 10px 14px; border-left: 4px solid #22c55e; background: #f6fbf8; border-radius: 0 6px 6px 0; line-height: 1.5;",
+    "h3": "font-size: 16px; font-weight: 700; color: #1f2937; margin: 26px 0 12px; padding: 0 0 6px 0; border-bottom: 1px dashed #bbf7d0;",
+    "p": "margin: 15px 0; text-indent: 0; text-align: justify; color: #20242d; line-height: 1.85;",
+    "blockquote": "margin: 22px 0; padding: 16px 18px; background: #f8fafc; border-left: 3px solid #22c55e; color: #425066; font-size: 14.5px; border-radius: 0 8px 8px 0; line-height: 1.8;",
+    "img": "max-width: 100%; height: auto; border-radius: 6px; margin: 22px auto; display: block; border: 1px solid #e5e7eb;",
+    "strong": "color: #111827; font-weight: 800; background: linear-gradient(180deg, transparent 62%, #dcfce7 62%, #dcfce7 95%, transparent 95%); padding: 1px 5px;",
+    "em": "font-style: italic; color: #596579;",
+    "code_inline": "background: #f1f5f9; color: #0f766e; padding: 2px 7px; border-radius: 4px; font-size: 13px; font-family: 'JetBrains Mono', 'Menlo', 'Consolas', 'SF Mono', monospace; border: 1px solid #e2e8f0;",
+    "code_block": "background: #111827; color: #e5e7eb; padding: 16px 18px; border-radius: 8px; font-size: 12.5px; line-height: 1.65; font-family: 'JetBrains Mono', 'Menlo', 'Consolas', 'SF Mono', monospace; overflow-x: auto; white-space: pre; margin: 24px 0; border: 1px solid #243041;",
+    "ul": "margin: 18px 0; padding-left: 0; list-style: none;",
+    "ol": "margin: 18px 0; padding-left: 0; list-style: none; counter-reset: list;",
+    "li": "margin: 9px 0; line-height: 1.8; color: #20242d; font-weight: 400;",
+    "li_bullet": "color: #16a34a; font-weight: 900; font-size: 14px; display: inline-block; min-width: 16px; margin-right: 8px; text-align: left;",
+    "li_bullet_char": "●",
+    "li_number": "color: #16a34a; font-weight: 800; font-size: 14px; min-width: 22px; display: inline-block; margin-right: 10px;",
+    "hr": "border: none; height: 1px; background: linear-gradient(to right, transparent, #bbf7d0, transparent); margin: 36px 0;",
+    "a": "color: #0f766e; text-decoration: none; border-bottom: 1px solid rgba(15,118,110,0.35); padding-bottom: 1px;",
+    "table": "width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 14px; border-radius: 6px; overflow: hidden; border: 1px solid #e5e7eb; table-layout: fixed; word-break: break-word;",
+    "th": "background: #111827; color: #ffffff; padding: 10px 12px; text-align: left; font-weight: 700; font-size: 12.5px; word-break: break-word; line-height: 1.5;",
+    "td": "padding: 10px 8px; border-bottom: 1px solid #edf2f7; color: #20242d; font-size: 13px; word-break: break-word; line-height: 1.55;",
+    "caption": "font-size: 12.5px; color: #8a93a3; text-align: center; margin-top: 10px;",
+    "section_divider": "text-align: center; color: #86efac; letter-spacing: 12px; font-size: 11px; margin: 34px 0; user-select: none;"
+  },
+  "highlights": {
+    "hl_yellow": "background: linear-gradient(180deg, transparent 55%, #fef08a 55%); color: #20242d; padding: 1px 6px; font-weight: 600;",
+    "hl_blue": "background: #dbeafe; color: #1e3a8a; padding: 2px 7px; border-radius: 3px; font-weight: 500;",
+    "hl_pink": "background: #ffe4e6; color: #9f1239; padding: 2px 7px; border-radius: 3px; font-weight: 500;",
+    "hl_green": "background: #dcfce7; color: #166534; padding: 2px 7px; border-radius: 3px; font-weight: 600;",
+    "em_red": "color: #dc2626; font-weight: 800;",
+    "em_blue": "color: #2563eb; font-weight: 800;",
+    "em_orange": "color: #ea580c; font-weight: 800;"
+  },
+  "section_divider_text": "● ● ●",
+  "code_colors": {
+    "kw": "color: #93c5fd; font-weight: 600;",
+    "str": "color: #86efac;",
+    "num": "color: #fdba74;",
+    "fn": "color: #67e8f9;",
+    "cls": "color: #c4b5fd;",
+    "comm": "color: #94a3b8; font-style: italic;",
+    "punct": "color: #cbd5e1;"
+  },
+  "list_style": {
+    "label": "GitHub Trending",
+    "num_container": "display: inline-block; background: #111827; color: #ffffff; font-weight: 800; font-size: 11px; min-width: 24px; height: 22px; line-height: 22px; text-align: center; border-radius: 4px; margin-right: 12px; vertical-align: 2px;",
+    "num_prefix": "",
+    "num_suffix": "",
+    "num_formatter": "padded",
+    "bullet_container": "display: inline-block; width: 6px; height: 6px; background: #22c55e; border-radius: 50%; margin-right: 12px; vertical-align: 3px;",
+    "bullet_char": ""
+  }
+}

@@ -1,0 +1,11 @@
+# Skill local secrets
+skills/**/config.yaml
+*/config.yaml
+
+# Keep example configs
+!skills/**/config.yaml.example
+!*/config.yaml.example
+
+# Python cache
+__pycache__/
+*.py[cod]

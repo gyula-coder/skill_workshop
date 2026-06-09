@@ -1,0 +1,4 @@
+config.yaml
+scripts/.token_cache*.json
+__pycache__/
+*.pyc
