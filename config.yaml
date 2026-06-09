@@ -1,0 +1,20 @@
+default: 小神仙
+
+report:
+  output_root: "/Users/suoer/iCloud/Documents/github-trending"
+  default_period: "daily"
+  limits:
+    daily: 10
+    weekly: 15
+    monthly: 20
+
+publish:
+  upload_workers: 4
+
+accounts:
+  小神仙:
+    name: "小神仙"
+    app_id: "wx14c47bb84d189287"
+    app_secret: "8d88294b3d0001eab92b856bd6b79d8a"
+    author: "小神仙"
+    theme: "github-trending"
