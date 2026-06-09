@@ -54,6 +54,12 @@ cp github-trending-report/config.yaml.example github-trending-report/config.yaml
 | 字段 | 必需 | 说明 |
 |------|------|------|
 | `default` | 是 | 默认使用的公众号账号 key，例如 `小神仙`。 |
+| `report.output_root` | 否 | 报告与兜底封面的输出根目录，默认 `./output`。 |
+| `report.default_period` | 否 | 未指定周期时使用的默认周期，默认 `daily`。 |
+| `report.limits.daily` | 否 | 日报默认抓取数量，默认 10。 |
+| `report.limits.weekly` | 否 | 周报默认抓取数量，默认 15。 |
+| `report.limits.monthly` | 否 | 月报默认抓取数量，默认 20。 |
+| `publish.image_upload_workers` | 否 | 发布时正文图片并发上传线程数，默认 4，允许范围 1-16。 |
 | `accounts.<key>.name` | 是 | 账号显示名。 |
 | `accounts.<key>.app_id` | 发布时必需 | 微信公众号 AppID。 |
 | `accounts.<key>.app_secret` | 发布时必需 | 微信公众号 AppSecret。 |

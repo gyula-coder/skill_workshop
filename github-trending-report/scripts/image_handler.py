@@ -3,15 +3,12 @@
 图片处理模块
 
 负责文章图片的完整生命周期：
-1. 从网络搜索并下载相关图片
+1. 提取 Markdown 中已有的图片引用
 2. 图片格式检查和基本处理
 3. 上传到微信服务器获取CDN链接
 4. 替换文章中的图片引用
-
-搜索图片时会优先寻找无版权限制的图片源。
 """
 
-import os
 import re
 import sys
 import json
@@ -19,11 +16,12 @@ import hashlib
 import requests
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from urllib.parse import urlparse, quote
+from urllib.parse import urlparse
 
 # 导入微信API
 sys.path.insert(0, str(Path(__file__).parent))
 from wechat_api import upload_content_image, upload_thumb_image, set_account
+from config import get_publish_config
 
 
 # ============================================================
@@ -344,9 +342,6 @@ def process_article_images(md_content, temp_dir=None):
     3. 并行上传到微信服务器(md5 去重,已上传过的直接复用 CDN URL)
     4. 替换Markdown中的图片链接
 
-    环境变量:
-        WECHAT_UPLOAD_WORKERS - 并发上传的线程数(默认 4,设为 1 即为串行)
-
     Args:
         md_content: Markdown文章内容
         temp_dir: 临时图片目录(同时用于存放 .uploaded_manifest.json)。
@@ -394,11 +389,7 @@ def process_article_images(md_content, temp_dir=None):
     # ------------------------------------------------------------
     # 阶段 2: 并行上传到微信(带 md5 去重)
     # ------------------------------------------------------------
-    try:
-        workers = int(os.environ.get("WECHAT_UPLOAD_WORKERS", "4"))
-    except ValueError:
-        workers = 4
-    workers = max(1, min(workers, 16))
+    workers = get_publish_config()["image_upload_workers"]
 
     manifest = load_manifest(temp_dir)
     mapping = {}  # 原始URL → 微信URL

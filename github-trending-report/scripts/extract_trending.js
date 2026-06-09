@@ -1,5 +1,5 @@
 // GitHub Trending Data Extractor
-// 粘贴到 browser_console(expression=...) 中运行
+// 在浏览器页面上下文执行
 // 提取当前 Trending 页面前 N 个仓库的完整信息
 
 const periodFromUrl = new URL(location.href).searchParams.get('since') || 'daily';
@@ -28,8 +28,9 @@ const repos = Array.from(document.querySelectorAll('article')).slice(0, limit).m
   const descEl = article.querySelector('p');
   const description = descEl?.textContent?.trim() || '';
 
-  // 语言：article 内第一个 link 后的文本节点
-  const langEl = article.querySelector('[href*="/trending?programming_language"]');
+  // 语言：GitHub 曾用 <a href*="/trending?programming_language">，现改用
+  // <span itemprop="programmingLanguage">。结构漂移时查 article 内语言标签。
+  const langEl = article.querySelector('[itemprop="programmingLanguage"]');
   const language = langEl?.textContent?.trim() || 'unknown';
 
   // 总星数 & fork 数

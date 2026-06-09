@@ -2,11 +2,7 @@
 
 github-trending-report skill 自带微信公众号草稿发布脚本。报告文章以纯 Markdown 传入本 skill 的 `scripts/publish.py`，脚本自动完成主题排版、HTML 转码、封面上传、创建草稿。
 
-配置文件固定放在本 skill 根目录：
-
-```text
-/Users/suoer/.hermes/skills/devops/github-trending-report/config.yaml
-```
+配置文件固定放在本 skill 根目录的 `config.yaml`。
 
 首次使用时，参考 `config.yaml.example` 创建真实配置文件。
 
@@ -14,18 +10,18 @@ github-trending-report skill 自带微信公众号草稿发布脚本。报告文
 
 调用 `scripts/publish.py` 前先检查：
 - `config.yaml` 存在。
-- 账号 `小神仙` 的 `app_id` / `app_secret` 已替换为真实值。
+- 默认账号 `小神仙` 的 `app_id` / `app_secret` 已替换为真实值。
 - 微信公众平台 API 白名单已允许当前运行机器公网 IP。
 - 公众号图文必须有封面图；如果 Markdown 正文没有图片，脚本会尝试基于 `assets/covers/{period}.png` 自动生成兜底封面。
 
-缺少配置时，先提示用户补齐，不要直接发布。
+缺少配置时，发布脚本会在读取文章和调用微信 API 前停止，并提示缺少的配置。
 
 ## 快速发布
 
 ```bash
-cd /Users/suoer/.hermes/skills/devops/github-trending-report
+cd github-trending-report
 python3 scripts/publish.py \
-  --input /Users/suoer/iCloud/Documents/github-trending/{period}/trending_{period}_{日期}.md \
+  --input {report.output_root}/{period}/trending_{period}_{日期}.md \
   --title "GitHub 趋势{日报|周报|月报} · {日期或日期范围}" \
   --digest "{top3 核心定位简述}"
 ```
@@ -36,29 +32,29 @@ python3 scripts/publish.py \
 - `monthly`
 
 publish.py 自动做：
-1. 读本 skill 根目录的 `config.yaml` 拿默认账号小神仙的 app_id/app_secret。
+1. 读本 skill 根目录的 `config.yaml` 拿默认账号 `小神仙` 的 app_id/app_secret。
 2. 按 github-trending 主题把 Markdown 转成微信公众号内联 HTML。
 3. 处理行内标色标记，例如 `==高亮==`、`++蓝色背景++`。
 4. 准备并上传封面：优先使用 `--cover`，未传时使用正文第一张图片；正文无图时基于周期 base 图生成兜底封面。
 5. 调 draft/add 接口创建草稿并返回 media_id。
 
+正文图片上传并发数由 `config.yaml` 的 `publish.image_upload_workers` 控制，默认 4，允许范围 1-16。
+
 ## 封面图
 
 公众号图文必须有封面图。手动封面可选，路径建议：
 
-```text
-/Users/suoer/iCloud/Documents/github-trending/{period}/cover_{period}_{日期}.png
-```
+建议路径：`{report.output_root}/{period}/cover_{period}_{日期}.png`
 
 发布时传入：
 
 ```bash
-cd /Users/suoer/.hermes/skills/devops/github-trending-report
+cd github-trending-report
 python3 scripts/publish.py \
-  --input /Users/suoer/iCloud/Documents/github-trending/{period}/trending_{period}_{日期}.md \
+  --input {report.output_root}/{period}/trending_{period}_{日期}.md \
   --title "GitHub 趋势{日报|周报|月报} · {日期或日期范围}" \
   --digest "{top3 核心定位简述}" \
-  --cover /Users/suoer/iCloud/Documents/github-trending/{period}/cover_{period}_{日期}.png
+  --cover {report.output_root}/{period}/cover_{period}_{日期}.png
 ```
 
 不传 `--cover` 时，脚本会尝试使用正文第一张图片作为封面；如果文章没有图片，会继续尝试生成兜底封面。
@@ -71,18 +67,14 @@ assets/covers/weekly.png
 assets/covers/monthly.png
 ```
 
-兜底封面输出到：
-
-```text
-/Users/suoer/iCloud/Documents/github-trending/{period}/cover_{period}_{日期}.png
-```
+兜底封面默认输出到报告 Markdown 同目录，文件名为 `cover_{period}_{日期}.png`。
 
 也可以单独生成封面：
 
 ```bash
-cd /Users/suoer/.hermes/skills/devops/github-trending-report
+cd github-trending-report
 python3 scripts/cover_generator.py \
-  --input /Users/suoer/iCloud/Documents/github-trending/{period}/trending_{period}_{日期}.md
+  --input {report.output_root}/{period}/trending_{period}_{日期}.md
 ```
 
 ## 账号选择
@@ -93,14 +85,10 @@ python3 scripts/cover_generator.py \
 
 ## 定时任务说明
 
-定时任务配置和主流程以 `SKILL.md` 为准：抓取数据、写报告、生成可选封面图都在主流程里完成。本文只记录主流程最后一步需要用到的草稿发布命令。
+定时任务配置和主流程以 `SKILL.md` 为准。本文只记录主流程最后一步需要用到的草稿发布命令。
 
 ## 潜在问题
 
-### publish.py 找不到
+### 平台前提
 
-确保当前 skill 内存在：
-
-```text
-/Users/suoer/.hermes/skills/devops/github-trending-report/scripts/publish.py
-```
+`scripts/cover_generator.py` 目前依赖 macOS 的 Swift/AppKit。非 macOS 环境请显式提供 `--cover`，不要依赖自动生成兜底封面。

@@ -50,6 +50,13 @@ def get_account_name() -> Optional[str]:
 # ============================================================
 
 UNIFIED_CONFIG_NAME = "config.yaml"
+PLACEHOLDER_SECRETS = {
+    "",
+    "your_app_secret_here",
+    "your-app-secret-here",
+    "replace_me",
+    "changeme",
+}
 
 
 def _config_path() -> Path:
@@ -206,6 +213,35 @@ def list_accounts() -> List[Dict[str, Any]]:
     return result
 
 
+def get_report_config() -> Dict[str, Any]:
+    """读取报告输出相关配置,缺失时返回最小默认值。"""
+    yaml_config = _load_config_yaml() or {}
+    report = yaml_config.get("report") or {}
+    limits = report.get("limits") or {}
+    return {
+        "output_root": report.get("output_root", "./output") or "./output",
+        "default_period": report.get("default_period", "daily") or "daily",
+        "limits": {
+            "daily": int(limits.get("daily", 10) or 10),
+            "weekly": int(limits.get("weekly", 15) or 15),
+            "monthly": int(limits.get("monthly", 20) or 20),
+        },
+    }
+
+
+def get_publish_config() -> Dict[str, Any]:
+    """读取发布流程配置,缺失时返回最小默认值。"""
+    yaml_config = _load_config_yaml() or {}
+    publish = yaml_config.get("publish") or {}
+    try:
+        image_upload_workers = int(publish.get("image_upload_workers", 4) or 4)
+    except (TypeError, ValueError):
+        image_upload_workers = 4
+    return {
+        "image_upload_workers": max(1, min(image_upload_workers, 16)),
+    }
+
+
 def get_config(account_name: Optional[str] = None) -> Dict[str, Any]:
     """
     获取当前账号的完整配置。
@@ -257,6 +293,10 @@ def get_config(account_name: Optional[str] = None) -> Dict[str, Any]:
     if not app_id or not app_secret:
         raise ConfigError(
             f"账号 '{account_name}' 缺少 app_id 或 app_secret"
+        )
+    if app_secret.strip() in PLACEHOLDER_SECRETS:
+        raise ConfigError(
+            f"账号 '{account_name}' 的 app_secret 仍是示例占位值，请先替换为真实配置"
         )
 
     return {

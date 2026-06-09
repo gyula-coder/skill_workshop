@@ -13,33 +13,40 @@ tags: [github, trending, daily, weekly, monthly, report, blog, wechat, analysis]
 
 先确定报告周期，再套用统一流程。
 
-| 周期 | GitHub 参数 | 默认数量 | 输出目录 | 文件名 | 标题 |
+| 周期 | GitHub 参数 | 默认数量 | 建议子目录 | 文件名 | 标题 |
 |------|-------------|----------|----------|--------|------|
 | 日报 | `since=daily` | top 10 | `daily/` | `trending_daily_{YYYY-MM-DD}.md` | GitHub 趋势日报 |
 | 周报 | `since=weekly` | top 15 | `weekly/` | `trending_weekly_{YYYY-MM-DD}.md` | GitHub 趋势周报 |
 | 月报 | `since=monthly` | top 20 | `monthly/` | `trending_monthly_{YYYY-MM-DD}.md` | GitHub 趋势月报 |
 
-默认输出根目录：
+建议输出根目录：
 
 ```text
-/Users/suoer/iCloud/Documents/github-trending/{daily|weekly|monthly}/
+./output/{daily|weekly|monthly}/
 ```
 
-如果用户没有指定周期，默认使用日报。若需要精简写作量，可从榜单前 N 个项目中精选子集，但必须在文章开头标注「本期精选了 top N 中的 X 个项目做深度解读」。
+这个路径对应 `config.yaml` 里的 `report.output_root`。如果当前运行环境已经约定了别的输出目录，请在配置里调整，不要在 skill 内写死某台机器的绝对路径。
+
+如果用户没有指定周期，默认使用 `config.yaml` 中的 `report.default_period`。若需要精简写作量，可从榜单前 N 个项目中精选子集，但必须在文章开头标注「本期精选了 top N 中的 X 个项目做深度解读」。
 
 ## 使用前配置检查
 
-每次开始执行前，先判断用户是否要求发布到微信公众号草稿箱。
+每次开始执行前，第一步先检查本 skill 根目录是否已有真实用户配置文件 `config.yaml`。
+
+如果 `config.yaml` 不存在：
+- 先提示用户参考 `config.yaml.example` 创建并补齐 `config.yaml`。
+- 至少补齐 `report.output_root`、`report.default_period` 和 `report.limits`，这样报告周期、抓取数量和输出目录都有明确来源。
+- 如果用户计划发布到微信公众号草稿箱，还要补齐默认账号 `小神仙` 的真实 `app_id` / `app_secret`。
+- 在用户补充配置前，不继续执行数据采集、写作或发布流程。
 
 如果只生成 Markdown 报告：
 - 不需要公众号配置。
-- 直接执行数据采集、写作和保存文件流程。
+- 已有 `config.yaml` 后，直接执行数据采集、写作和保存文件流程。
 
 如果用户要求发布到微信公众号草稿箱，必须先检查并提示用户确认以下配置，不要等报告写完后才检查：
-- 本 skill 根目录存在真实配置文件 `config.yaml`。
-- `config.yaml` 中账号 `小神仙` 已填写真实 `app_id` 和 `app_secret`，不是示例占位值。
+- `config.yaml` 中默认账号 `小神仙` 已填写真实 `app_id` 和 `app_secret`，不是示例占位值。
 - 微信公众平台已把当前运行机器公网 IP 加入 API 白名单；否则可能获取 token 失败。
-- 公众号图文必须有封面图；如果文章正文没有图片，先用 `assets/covers/{period}.png` 自动生成兜底封面，输出到 `/Users/suoer/iCloud/Documents/github-trending/{period}/cover_{period}_{YYYY-MM-DD}.png`。
+- 公众号图文必须有封面图；如果文章正文没有图片，先用 `assets/covers/{period}.png` 自动生成兜底封面，默认输出到报告 Markdown 同目录。
 
 缺少以上任一发布必需项时，先明确告诉用户缺什么，并停在发布前配置阶段。可以继续生成 Markdown 报告，但不要尝试调用 `scripts/publish.py` 发布。
 
@@ -49,17 +56,19 @@ tags: [github, trending, daily, weekly, monthly, report, blog, wechat, analysis]
 
 ### 流程
 
-1. 选择周期：`daily` / `weekly` / `monthly`。
-2. 如果用户要求发布到公众号草稿箱，先完成「使用前配置检查」。
-3. 用 browser 打开 `https://github.com/trending?since={period}`，通过 browser_console(expression=...) 注入 `scripts/extract_trending.js` 的代码，提取前 N 个仓库数据。
+1. 执行「使用前配置检查」：确认 `config.yaml` 已存在；如果不存在，先让用户补充配置，再继续运行。（config.yaml.example中是假配置，Agent不能把假配置写到`config.yaml`中）。
+2. 选择周期：`daily` / `weekly` / `monthly`。如果用户未指定，默认使用 `config.yaml` 中的 `report.default_period`。
+3. 如果用户要求发布到公众号草稿箱，确认发布必需配置已齐全。
+4. 读取 `config.yaml` 的 `report.limits.{period}` 得到前 N 数量。
+5. 用浏览器打开 `https://github.com/trending?since={period}`，先在页面上下文设置 `window.__TRENDING_LIMIT__ = N`，再执行 `scripts/extract_trending.js`，提取前 N 个仓库数据。
    - 字段：排名、名称、描述、总星数、周期增量、语言、fork、贡献者。
    - 验证：先跑一条确保字段齐全、星数和周期增量为数字。
    - 回退：如果页面结构变了，从 `article.textContent` 中正则提取。
-4. 对每个项目依次写：核心定位、通俗解读、热度拆解、上手建议。
-5. 如果是周报或月报，添加「本期视角」「领域速览」「连续上榜标注」。
-6. 写「潜力项目」，列出 2-3 个未进入深度分析但值得关注的项目。
-7. 保存到 `/Users/suoer/iCloud/Documents/github-trending/{period}/trending_{period}_{YYYY-MM-DD}.md`。
-8. 如需发布，确认发布必需配置齐全后，调用本 skill 内置的 `scripts/publish.py` 创建微信公众号草稿；未提供封面且正文无图时，发布脚本会基于 `assets/covers/{period}.png` 自动生成兜底封面。
+6. 对每个项目依次写：核心定位、通俗解读、热度拆解、上手建议。
+7. 如果是周报或月报，添加「本期视角」「领域速览」「连续上榜标注」。
+8. 写「潜力项目」，列出 2-3 个未进入深度分析但值得关注的项目。
+9. 保存到 `{report.output_root}/{period}/trending_{period}_{YYYY-MM-DD}.md`。
+10. 如需发布，调用本 skill 内置的 `scripts/publish.py` 创建微信公众号草稿；具体命令和封面规则见 `references/wechat-draft-publish.md`。
 
 ## 输出格式
 
@@ -220,50 +229,21 @@ tags: [github, trending, daily, weekly, monthly, report, blog, wechat, analysis]
 
 ## 输出方式
 
-### 方式 A：存为 Markdown 文件（默认）
+### 方式 A：存为 Markdown 文件
 
-```text
-/Users/suoer/iCloud/Documents/github-trending/{period}/trending_{period}_{YYYY-MM-DD}.md
-```
-
-### 方式 B：存文件 + 发布到公众号草稿箱
+### 方式 B: 存文件 + 发布到公众号草稿箱  (默认)
 
 存文件后调用本 skill 内置发布流程。详细命令见 `references/wechat-draft-publish.md`。
 
 ## 定时任务配置
 
-日报：
+是否支持定时任务、字段名怎么写，取决于具体运行这个 skill 的 agent 或调度器。这个 skill 只约定任务意图，不绑定某个产品的调度 schema。
 
-```json
-{
-  "schedule": "0 9 * * *",
-  "prompt": "按照 github-trending-report skill 生成今日 GitHub Trending 日报，然后发布到微信公众号草稿箱。",
-  "skills": ["github-trending-report"],
-  "enabled_toolsets": ["web", "terminal", "file", "browser"]
-}
-```
+建议任务文案：
 
-周报：
-
-```json
-{
-  "schedule": "0 10 * * 0",
-  "prompt": "按照 github-trending-report skill 生成本期 GitHub Trending 周报，然后发布到微信公众号草稿箱。",
-  "skills": ["github-trending-report"],
-  "enabled_toolsets": ["web", "terminal", "file", "browser"]
-}
-```
-
-月报：
-
-```json
-{
-  "schedule": "0 10 1 * *",
-  "prompt": "按照 github-trending-report skill 生成过去 30 日 GitHub Trending 月报，然后发布到微信公众号草稿箱。",
-  "skills": ["github-trending-report"],
-  "enabled_toolsets": ["web", "terminal", "file", "browser"]
-}
-```
+- 日报：`按照 github-trending-report skill 生成今日 GitHub Trending 日报；如用户要求，再发布到微信公众号草稿箱。`
+- 周报：`按照 github-trending-report skill 生成本期 GitHub Trending 周报；如用户要求，再发布到微信公众号草稿箱。`
+- 月报：`按照 github-trending-report skill 生成过去 30 日 GitHub Trending 月报；如用户要求，再发布到微信公众号草稿箱。`
 
 ## 相关文件
 
@@ -273,38 +253,47 @@ tags: [github, trending, daily, weekly, monthly, report, blog, wechat, analysis]
 - `scripts/wechat_api.py` / `scripts/wechat_token.py` / `scripts/html_converter.py` / `scripts/image_handler.py` - 本地发布依赖模块。
 - `assets/themes/github-trending.json` - 本地公众号排版主题。
 - `assets/covers/{daily|weekly|monthly}.png` - 日报、周报、月报封面 base 图。
-- `references/wechat-draft-publish.md` - 发布到微信公众号草稿箱的集成说明。
+- `references/wechat-draft-publish.md` - 发布到微信公众号草稿箱的补充说明。
 - `config.yaml.example` - 本 skill 的公众号账号配置示例；真实配置为 `config.yaml`。
-- `/Users/suoer/iCloud/Documents/github-trending/{period}/trending_{period}_{日期}.md` - 生成的报告文件。
-- `/Users/suoer/iCloud/Documents/github-trending/{period}/cover_{period}_{日期}.png` - 可选封面图。
+- `{report.output_root}/{period}/trending_{period}_{日期}.md` - 生成的报告文件。
+- `{report.output_root}/{period}/cover_{period}_{日期}.png` - 可选封面图。
 
 ## 发布到微信公众号草稿箱
 
-利用本 skill 内置的 `scripts/publish.py` 脚本，将报告自动排版后发布到微信公众号草稿箱，不自动群发。
+利用本 skill 内置的 `scripts/publish.py` 脚本，将报告自动排版后发布到微信公众号草稿箱，不自动群发。发布前配置检查、快速命令、封面优先级和平台前提都以 `references/wechat-draft-publish.md` 为准。
 
-发布前检查本 skill 根目录是否存在真实配置文件：
-
-```text
-/Users/suoer/.hermes/skills/devops/github-trending-report/config.yaml
-```
-
-默认使用 **小神仙** 账号和 `github-trending` 主题。
-
-发布前生成标题和摘要：
+发布前需要准备：
 - 标题：`GitHub 趋势{日报|周报|月报} · {日期或日期范围}`
 - 摘要：用 top 3 项目的核心定位压缩成一句话。
+- 真实配置文件：本 skill 根目录的 `config.yaml`。
 
-封面生成规则：
-- 优先使用命令行传入的 `--cover`。
-- 未传 `--cover` 时，优先使用正文第一张图片。
-- 如果正文没有图片，且报告文件名符合 `trending_{period}_{YYYY-MM-DD}.md`，自动使用 `assets/covers/{period}.png` 生成兜底封面。
-- 兜底封面输出路径为 `/Users/suoer/iCloud/Documents/github-trending/{period}/cover_{period}_{YYYY-MM-DD}.png`。
+## 配置项
+
+`config.yaml` 当前可配置项：
+
+| 字段 | 必需 | 说明 |
+|------|------|------|
+| `default` | 是 | 默认公众号账号 key，默认是 `小神仙`。 |
+| `report.output_root` | 否 | 报告与兜底封面的输出根目录，默认 `./output`。 |
+| `report.default_period` | 否 | 未指定周期时使用的默认周期，默认 `daily`。 |
+| `report.limits.daily` | 否 | 日报默认抓取数量，默认 10。 |
+| `report.limits.weekly` | 否 | 周报默认抓取数量，默认 15。 |
+| `report.limits.monthly` | 否 | 月报默认抓取数量，默认 20。 |
+| `publish.image_upload_workers` | 否 | 发布时正文图片并发上传线程数，默认 4，允许范围 1-16。 |
+| `accounts.<key>.name` | 是 | 账号显示名。 |
+| `accounts.<key>.app_id` | 发布时必需 | 微信公众号 AppID。 |
+| `accounts.<key>.app_secret` | 发布时必需 | 微信公众号 AppSecret。 |
+| `accounts.<key>.author` | 否 | 发布文章时默认作者名。 |
+| `accounts.<key>.theme` | 否 | 排版主题名，对应 `assets/themes/<theme>.json`。 |
 
 ## 踩过的坑
 
 1. **GitHub Trending 不是稳定 API**：每次运行前先验证提取结果字段完整、数字合法。结构漂移时更新 `scripts/extract_trending.js`。
+   - **语言选择器是个已知漂移点**：GitHub 曾用 `a[href*="/trending?programming_language"]`，现已改为 `[itemprop="programmingLanguage"]`。提取后先看有无语言全是 "unknown"——如果全是未知，优先查这个选择器。
+   - **browser_console 提取时注意**：直接 `console.log(JSON.stringify(...))` 在 browser_console 工具中返回 null。应改为 IIFE 并 `JSON.stringify(...)` 作为返回值，或用 `browser_console` 的 `expression` 参数包裹为返回值表达式。
 2. **时间窗口要写准**：daily/weekly/monthly 都是 GitHub Trending 的滚动窗口，不要把 weekly 写成固定周一到周日。
 3. **历史对比不要编**：连续上榜标注只用于周报和月报，且最多回看过去 5 期；过去 5 期没出现就写「最近五期首次上榜」，没有同周期历史报告时写首次生成。
 4. **分析别复读数据**：报告价值在于解释需求、信任和信号，不是把 README 换个说法。
 5. **项目数量不要注水**：质量优先；精选时在开头说明覆盖范围。
 6. **发布后要预览草稿箱**：确认标题、摘要、分段和封面显示正常后再手动群发。
+7. **Token 40001 错误**：微信普通 token 接口 `/cgi-bin/token` 返回的 token 可能被后续请求踢掉，报 `invalid credential, access_token is invalid or not latest`。`scripts/wechat_token.py` 已改用稳定接口 `/cgi-bin/stable_token`（POST + JSON body 方式调用），避免 token 间互相失效。如果仍然 40001，检查旧缓存文件 `.token_cache_*.json` 是否残留了老接口获取的 token——把 `expires_at` 改为 0 强制刷新即可。

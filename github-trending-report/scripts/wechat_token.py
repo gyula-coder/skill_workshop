@@ -22,7 +22,7 @@ from config import get_config
 TOKEN_CACHE_DIR = Path(__file__).parent
 TOKEN_SAFETY_MARGIN_SEC = 300  # 提前 5 分钟刷新
 TOKEN_TIMEOUT_SEC = 10
-TOKEN_API_URL = "https://api.weixin.qq.com/cgi-bin/token"
+TOKEN_API_URL = "https://api.weixin.qq.com/cgi-bin/stable_token"
 
 # 进程内缓存: account_key → {"token": str, "expires_at": float}
 _token_caches: Dict[str, Dict[str, Any]] = {}
@@ -78,9 +78,9 @@ def _fetch_token_with_retry(app_id: str, app_secret: str, account_key: str, retr
     last_exc: Optional[Exception] = None
     for attempt in range(retries + 1):
         try:
-            resp = requests.get(
+            resp = requests.post(
                 TOKEN_API_URL,
-                params={
+                json={
                     "grant_type": "client_credential",
                     "appid": app_id,
                     "secret": app_secret,

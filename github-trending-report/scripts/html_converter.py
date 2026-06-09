@@ -139,6 +139,7 @@ def load_theme(theme_name=None, style_path=None):
     if theme_name:
         candidates.append(_themes_dir() / f"{theme_name}.json")
 
+    resolved = False
     for path in candidates:
         if path and path.exists():
             try:
@@ -150,9 +151,13 @@ def load_theme(theme_name=None, style_path=None):
                     divider_text = data["section_divider_text"]
                 if data.get("list_style"):
                     list_style.update(data["list_style"])
+                resolved = True
                 break
             except (json.JSONDecodeError, KeyError):
-                continue
+                raise ValueError(f"主题文件无效: {path}")
+
+    if theme_name and not resolved:
+        raise FileNotFoundError(f"未找到主题: {theme_name} (期望路径: {_themes_dir() / f'{theme_name}.json'})")
 
     return styles, highlights, divider_text, list_style
 

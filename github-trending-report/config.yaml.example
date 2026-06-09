@@ -4,6 +4,17 @@
 
 default: 小神仙
 
+report:
+  output_root: "./output"
+  default_period: "daily"
+  limits:
+    daily: 10
+    weekly: 15
+    monthly: 20
+
+publish:
+  image_upload_workers: 4
+
 accounts:
   小神仙:
     name: "小神仙"

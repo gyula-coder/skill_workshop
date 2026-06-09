@@ -20,7 +20,6 @@ from typing import Optional, Tuple
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 COVER_ASSET_DIR = ROOT_DIR / "assets" / "covers"
-DEFAULT_OUTPUT_ROOT = Path("/Users/suoer/iCloud/Documents/github-trending")
 PERIODS = {"daily", "weekly", "monthly"}
 
 
@@ -144,7 +143,7 @@ def default_date_label(period: str, date: str) -> str:
 
 
 def default_output_path(period: str, date: str) -> Path:
-    return DEFAULT_OUTPUT_ROOT / period / f"cover_{period}_{date}.png"
+    return Path.cwd() / "output" / period / f"cover_{period}_{date}.png"
 
 
 def infer_cover_spec_from_path(path: Path) -> Optional[Tuple[str, str]]:
@@ -228,6 +227,9 @@ def main() -> None:
         parser.error("请提供 --period/--date，或提供可推断的 --input")
 
     output = Path(args.output) if args.output else None
+    if output is None and args.input:
+        input_path = Path(args.input)
+        output = input_path.parent / f"cover_{period}_{date}.png"
     cover_path = generate_cover(period, date, output=output, label=args.label)
     print(cover_path)
 

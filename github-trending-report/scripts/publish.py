@@ -286,7 +286,8 @@ def publish_from_markdown(
         if inferred:
             period, cover_date = inferred
             try:
-                cover_path = str(generate_cover(period, cover_date))
+                auto_cover = md_path.parent / f"cover_{period}_{cover_date}.png"
+                cover_path = str(generate_cover(period, cover_date, output=auto_cover))
                 print(f"  已生成兜底封面图：{cover_path}")
             except Exception as e:
                 print(f"  兜底封面生成失败：{e}")
@@ -424,19 +425,8 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def _resolve_config(args):
-    """按命令行参数回读账号配置,填充 author/theme。"""
-    needs_config = (
-        args.author is None or args.theme is None
-    )
-    if not needs_config:
-        return
-
-    try:
-        config = get_config()
-    except ConfigError as e:
-        if args.author is None:
-            args.author = "小神仙"
-        return
+    """发布前校验账号配置,并填充 author/theme。"""
+    config = get_config(args.account)
 
     if args.author is None:
         args.author = config.get("author", "") or "小神仙"
@@ -452,12 +442,13 @@ def main():
     if args.account:
         set_account(args.account)
 
-    # 从账号配置回读 author / theme
-    _resolve_config(args)
-
     if args.html:
         if not args.title or not args.cover:
             parser.error("使用 --html 模式时，必须提供 --title 和 --cover")
+        try:
+            _resolve_config(args)
+        except ConfigError as e:
+            parser.error(f"发布前配置检查失败: {e}")
         result = publish_from_html(
             html_path=args.html,
             title=args.title,
@@ -467,6 +458,10 @@ def main():
             source_url=args.source_url,
         )
     elif args.input:
+        try:
+            _resolve_config(args)
+        except ConfigError as e:
+            parser.error(f"发布前配置检查失败: {e}")
         result = publish_from_markdown(
             md_path=args.input,
             title=args.title,
