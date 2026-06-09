@@ -25,6 +25,7 @@
 | `theme_notes` | 主题选择理由和默认主题适配说明。 |
 | `image_style_notes.article_default` | 普通图文默认配图风格说明。 |
 | `image_style_notes.newspic_default` | 贴图 newspic 默认配图风格说明。 |
+| `image_style_notes.fallback` | 内容不适合默认配图风格时的兜底规则。 |
 | `image_style_notes.optional` | 可选配图风格和适用场景。 |
 | `image_style_notes.avoid` | 不建议使用的配图风格和原因。 |
 | `style_preferences.tone` | 账号整体文字风格偏好。 |
@@ -83,6 +84,14 @@ accounts:
 | `assets/image-styles/README.md` | `illustrated-warm` 可作为 `main` 号讲使用体验时首选 |
 | `assets/image-styles/README.md` | `xiaohongshu-colorful` 可选，`main` 号做生活类时用 |
 | `assets/image-styles/xiaohongshu-colorful.json` | `main` 号做生活向 / 入门指南 / 清单类内容适合 |
+| `assets/image-styles/quote-card-minimal.json` | `quote-card-minimal` 只推荐 newspic，文章内联图会太冷清 |
+| `assets/image-styles/README.md` | 如果只想要一句金句大字卡，用 `quote-card-minimal` |
+
+已迁移到:
+
+- `accounts.main.image_style_notes.fallback.abstract_point`
+- `accounts.main.image_style_notes.fallback.quote_or_punchline`
+- `accounts.main.image_style_notes.avoid.quote-card-minimal`
 
 ## tech / 葱哥
 
@@ -132,10 +141,20 @@ accounts:
 | `assets/image-styles/README.md` | 抽象观点不如用 `tech-card-blue` 做极简大字卡 |
 | `assets/image-styles/README.md` | `quote-card-minimal` 最适合 `tech` 号葱哥 |
 | `assets/image-styles/quote-card-minimal.json` | `tech` 账号 / 葱哥最适合这个风格，冷、静、有分量 |
+| `assets/image-styles/quote-card-minimal.json` | `quote-card-minimal` 只推荐 newspic，文章内联图会太冷清 |
 | `assets/image-styles/README.md` | `meme-illustration` 可作为 `tech` 号文末吐槽 |
 | `assets/image-styles/meme-illustration.json` | `tech` 账号葱哥可以偶尔用一张做文末吐槽收尾 |
+| `assets/image-styles/meme-illustration.json` | meme 有保鲜期，用过时的梗比没梗还尴尬 |
 | `assets/image-styles/README.md` | `xiaohongshu-colorful` 不适合 `tech` 号葱哥 |
 | `assets/image-styles/xiaohongshu-colorful.json` | 不建议用于技术号 / `tech` 账号，葱哥冷吐槽风格和该视觉不搭 |
+
+已迁移到:
+
+- `accounts.tech.image_style_notes.fallback.abstract_point`
+- `accounts.tech.image_style_notes.optional.quote-card-minimal`
+- `accounts.tech.image_style_notes.optional.meme-illustration`
+- `accounts.tech.image_style_notes.avoid.quote-card-minimal`
+- `accounts.tech.image_style_notes.avoid.xiaohongshu-colorful`
 
 ## 全局脚本旧兜底
 

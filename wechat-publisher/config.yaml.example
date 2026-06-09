@@ -10,7 +10,7 @@ accounts:
     name: "我的主公众号"
     app_id: "wx1234567890abcdef"
     app_secret: "your_app_secret_here"
-    author: "飞哥"
+    author: "author_1"
     theme: "refined-blue"
     image_style: "hand-drawn-blue"
     newspic_image_style: "infographic-warm"
@@ -28,9 +28,14 @@ accounts:
     image_style_notes:
       article_default: "hand-drawn-blue：文章级安全默认，适合概念解释、产品拆解和工程说明。"
       newspic_default: "infographic-warm：贴图默认，高密度手绘水彩信息图。"
+      fallback:
+        abstract_point: "如果要点只有一句抽象观点，不适合强行生成高密度信息图，优先换成极简大字卡。"
+        quote_or_punchline: "纯金句或单句观点优先考虑 quote-card-minimal，但只用于贴图。"
       optional:
         illustrated-warm: "讲使用体验、故事卡、亲切感强的指南时可选。"
         xiaohongshu-colorful: "生活向、入门指南、清单类内容可选。"
+      avoid:
+        quote-card-minimal: "文章内联图不建议使用，会显得太冷清。"
     style_preferences:
       tone: "更口语、更有人味，允许类比、反问和个人判断。"
       visual: "蓝调、手绘、暖色信息图优先。"
@@ -41,7 +46,7 @@ accounts:
     name: "技术博客号"
     app_id: "wx0987654321fedcba"
     app_secret: "another_app_secret"
-    author: "葱哥"
+    author: "author_2"
     theme: "minimal-mono"
     image_style: "tech-card-blue"
     newspic_image_style: "infographic-blue"
@@ -59,11 +64,14 @@ accounts:
     image_style_notes:
       article_default: "tech-card-blue：浅蓝底极简大字卡，适合技术技巧、命令讲解、短观点。"
       newspic_default: "infographic-blue：冷蓝高密度信息图，适合 SDK、协议、产品拆解。"
+      fallback:
+        abstract_point: "如果要点只有一句抽象观点，不如用 tech-card-blue 做极简大字卡，避免信息图编细节。"
       optional:
-        quote-card-minimal: "观点金句、哲思、收尾页可选；冷、静、有分量。"
-        meme-illustration: "文末吐槽或轻松转场可偶尔使用。"
+        quote-card-minimal: "观点金句、哲思、收尾页可选；只推荐 newspic 模式，冷、静、有分量。"
+        meme-illustration: "文末吐槽或轻松转场可偶尔使用；meme 有保鲜期，慎用过时梗。"
       avoid:
         xiaohongshu-colorful: "不适合严肃技术深度稿。"
+        quote-card-minimal: "文章内联图不建议使用，会显得太冷清。"
     style_preferences:
       tone: "更克制、更短句，少修辞，允许冷吐槽。"
       visual: "极简、冷蓝、黑白、技术感优先。"

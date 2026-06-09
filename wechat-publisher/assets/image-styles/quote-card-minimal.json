@@ -33,5 +33,5 @@
     "article_inline": null
   },
   "example_reference": "(参考 MoMA / The New Yorker 内页引文排版)",
-  "notes": "只推荐 newspic 模式。用于文章内联图会显得太冷清。账号是否默认使用该风格以 config.yaml 的 newspic_image_style 为准。"
+  "notes": "只推荐 newspic 模式。用于文章内联图会显得太冷清。"
 }
