@@ -228,7 +228,7 @@ pip install requests pyyaml --break-system-packages 2>/dev/null || pip install r
 4. 同一批次 / 同一账号连续发文时,优先避开最近一篇用过的结构。
 5. 选定后写入 `brief.md`,便于后续复盘和避免风格重复。
 
-#### 文章结构库
+##### 文章结构库
 
 | `article_structure` | 适合题材 | 开头钩子 | 正文推进 |
 |---|---|---|---|
@@ -241,7 +241,7 @@ pip install requests pyyaml --break-system-packages 2>/dev/null || pip install r
 | `playbook` 行动清单 | 方法论 / 技巧合集 / 入门指南 / 生产力 | 先给结果承诺或适用人群 | 适合谁 → 最短路径 → 3-5 个关键动作 → 常见坑 → 何时不该用 |
 | `case-file` 案卷复盘 | 翻车 / 处罚 / 安全事件 / 商业事故 | 用"案情摘要"或核心矛盾开场 | 案件事实 → 证据链 → 错在哪里 → 反方解释 → 对普通人的启发 |
 
-#### 开头钩子库
+##### 开头钩子库
 
 | `opening_hook` | 写法 | 避免 |
 |---|---|---|
