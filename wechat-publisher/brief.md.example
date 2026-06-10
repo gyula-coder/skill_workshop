@@ -16,7 +16,7 @@ card_count: 4
 title: "Claude Code 里,最有用的命令之一"
 
 # 可选:发到哪个账号。不写用 --account 或 config.yaml 的 default
-account: main
+# account: <account>
 ---
 
 # 要点
@@ -47,4 +47,4 @@ account: main
    → 输出 card_plan.json,每张卡配好 Gemini prompt
 3. Claude 按 card_plan.json 里每张卡的 prompt 逐张生图,保存到 ./images/01.png、02.png、...
 4. (可选)`python3 scripts/ai_score.py brief.md --mode newspic --threshold 45` 手动预检
-5. `python3 scripts/publish.py --account main --type newspic --brief brief.md`
+5. `python3 scripts/publish.py --type newspic --brief brief.md`

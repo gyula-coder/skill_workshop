@@ -13,8 +13,8 @@
 ## 触发方式
 
 ```bash
-python3 scripts/publish.py --account main --input article.md --cover cover.jpg --sync zhihu,juejin
-python3 scripts/publish.py --account main --input article.md --cover cover.jpg --sync-from-config
+python3 scripts/publish.py --input article.md --cover cover.jpg --sync zhihu,juejin
+python3 scripts/publish.py --input article.md --cover cover.jpg --sync-from-config
 python3 scripts/multi_publish.py --input article.md --platforms zhihu,juejin
 ```
 

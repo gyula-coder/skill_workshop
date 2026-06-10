@@ -92,6 +92,10 @@ image_generation:
     api_key: ""
     image_model: "gemini-2.5-flash"
 
+  # baoyu-image-gen / provider=ideogram
+  ideogram:
+    api_key: ""
+
   # baoyu-image-gen / provider=evolink
   evolink:
     api_key: ""

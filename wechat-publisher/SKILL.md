@@ -69,6 +69,23 @@ python3 -c "from scripts.wechat_api import get_access_token; print(get_access_to
 
 写作时必须使用当前账号的 `voice`，不要在文档或代码里额外硬编码账号人格。
 
+## 阶段输入输出总览
+
+| 阶段 | 输入 | 输出 |
+|---|---|---|
+| 阶段一:理解需求与收集素材 | 用户话题、参考资料、目标账号、发布诉求 | `brief.md` 或等价需求说明 |
+| 阶段二:全网信息搜索与整理 | `brief.md`、已有资料、待核实事实 | `research.md` 或事实与语料清单 |
+| 阶段三:撰写骨架稿 | `brief.md`、`research.md`、账号 `voice` | 第一版完整 Markdown |
+| 阶段 3.5:人味化改写 | Markdown 初稿、账号 `voice`、人味化清单 | 人味化后的 Markdown |
+| 阶段四:生成配图 | Markdown / `brief.md`、账号图片风格、图片 prompt | 封面、正文配图或 newspic 图片 |
+| 阶段五:转换微信排版 | Markdown、账号 `theme`、图片映射 | 微信可用的内联 HTML |
+| 阶段 5.5:AI 味自检 gate | 待发布 Markdown 或 newspic 短文本 | AI 检测结果；通过则继续，失败则回到阶段 3.5 |
+| 阶段六:发布到草稿箱 | Markdown/HTML、封面、标题摘要、账号配置 | 微信草稿 `media_id` |
+| 阶段七:多平台同步(可选) | 已发布草稿对应内容、同步平台配置 | 各平台同步结果 |
+
+普通图文主链路:用户需求 -> `brief.md` -> `research.md` -> `article.md` -> 配图 -> HTML -> AI gate -> 微信草稿。  
+贴图 `newspic` 主链路:用户需求 -> `brief.md` -> `card_plan.json` -> `images/` -> 短文本 AI gate -> 微信贴图草稿。
+
 ## 7 阶段主流程
 
 ### 阶段一:理解需求与收集素材
@@ -157,7 +174,7 @@ python3 -c "from scripts.wechat_api import get_access_token; print(get_access_to
 常用命令:
 
 ```bash
-python3 scripts/generate_image.py --account main --prompt "A hand-drawn AI infographic" --image ./images/01.png
+python3 scripts/generate_image.py --prompt "A hand-drawn AI infographic" --image ./images/01.png
 ```
 
 provider 细节、风格说明、Evolink 异步轮询,读:
@@ -193,7 +210,7 @@ python3 scripts/html_converter.py article.md --theme refined-blue -o article.htm
 
 ```bash
 python3 scripts/ai_score.py article.md --threshold 45
-python3 scripts/publish.py --account main --input article.md --cover cover.jpg --title "标题"
+python3 scripts/publish.py --input article.md --cover cover.jpg --title "标题"
 ```
 
 规则:
@@ -215,7 +232,6 @@ python3 scripts/publish.py --account main --input article.md --cover cover.jpg -
 
 ```bash
 python3 scripts/publish.py \
-  --account main \
   --input article.md \
   --cover cover.jpg \
   --title "文章标题"
@@ -233,7 +249,7 @@ python3 scripts/publish.py \
 如果用户已经有 HTML:
 
 ```bash
-python3 scripts/publish.py --account main --html article.html --cover cover.jpg --title "标题"
+python3 scripts/publish.py --html article.html --cover cover.jpg --title "标题"
 ```
 
 微信接口、错误码和上传规则,读:
@@ -248,8 +264,8 @@ python3 scripts/publish.py --account main --html article.html --cover cover.jpg 
 常用方式:
 
 ```bash
-python3 scripts/publish.py --account main --input article.md --cover cover.jpg --sync zhihu,juejin
-python3 scripts/publish.py --account main --input article.md --cover cover.jpg --sync-from-config
+python3 scripts/publish.py --input article.md --cover cover.jpg --sync zhihu,juejin
+python3 scripts/publish.py --input article.md --cover cover.jpg --sync-from-config
 ```
 
 安装前置、图片注意事项和失败处理,读:
@@ -265,7 +281,7 @@ python3 scripts/publish.py --account main --input article.md --cover cover.jpg -
 1. 写 `brief.md`
 2. `python3 scripts/newspic_build.py brief.md`
 3. 按 `card_plan.json` 生图到 `images/`
-4. `python3 scripts/publish.py --account main --type newspic --brief brief.md`
+4. `python3 scripts/publish.py --type newspic --brief brief.md`
 
 更细的 `brief.md` 格式、卡片规则和限制,读:
 

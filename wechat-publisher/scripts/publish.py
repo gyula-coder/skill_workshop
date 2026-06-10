@@ -640,7 +640,8 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--image-style",
         help="配图风格名(对应 assets/image-styles/<name>.json)。"
-             "优先级: CLI > brief/article frontmatter > 账号默认 > hand-drawn-blue。"
+             "优先级: CLI > brief/article frontmatter > 账号默认 > 模式兜底"
+             "(news=hand-drawn-blue,newspic=infographic-warm)。"
              "list: python3 wechat_api.py list-image-styles",
     )
     parser.add_argument(

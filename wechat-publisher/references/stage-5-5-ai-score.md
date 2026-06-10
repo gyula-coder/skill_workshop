@@ -6,7 +6,7 @@
 
 ```bash
 python3 scripts/ai_score.py article.md --threshold 45
-python3 scripts/publish.py --account main --input article.md --cover cover.jpg --title "标题"
+python3 scripts/publish.py --input article.md --cover cover.jpg --title "标题"
 ```
 
 ## 经验阈值

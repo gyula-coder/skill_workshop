@@ -16,16 +16,16 @@
     # 4. Claude 跑 AI 味检测(newspic 模式)
     python3 ai_score.py article.md --mode newspic
     # 5. 发布
-    python3 publish.py --account main --type newspic --brief brief.md
+    python3 publish.py --type newspic --brief brief.md
 
 brief.md 格式示例:
 
     ---
     topic: "Claude Code /rewind 命令"
-    image_style: tech-card-blue    # 可选,不写就用账号默认或 hand-drawn-blue
+    image_style: tech-card-blue    # 可选,不写就用账号 newspic_image_style 或全局兜底
     card_count: 6                  # 可选,不写就跟要点数走
     title: "Claude Code 里,最有用的命令之一"
-    account: main
+    # account: <account>
     ---
 
     # 要点
@@ -383,7 +383,7 @@ def main():
     print(f"     目标路径: {brief_path.parent}/images/01.png, 02.png, ...")
     print("  2. 如短文本未填,Claude 根据要点撰写 100-300 字短描述写入 brief.md '# 短文本' 小节")
     print("  3. python3 ai_score.py <brief.md 里的短文本> --mode newspic --threshold 45")
-    print(f"  4. python3 publish.py --account <main|tech> --type newspic --brief {brief_path}")
+    print(f"  4. python3 publish.py --type newspic --brief {brief_path}")
 
 
 if __name__ == "__main__":

@@ -347,7 +347,7 @@ def resolve_image_style(
     按优先级解析最终使用的配图风格:
       1. CLI 参数(--image-style)
       2. brief.md / article.md 的 frontmatter image_style 字段
-      3. config.yaml 对应账号的 image_style 字段
+      3. news 模式使用账号 image_style; newspic 模式使用账号 newspic_image_style
       4. 全局默认:news 模式 → DEFAULT_IMAGE_STYLE(hand-drawn-blue);
                    newspic 模式 → DEFAULT_NEWSPIC_IMAGE_STYLE(infographic-warm)
 

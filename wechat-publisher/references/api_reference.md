@@ -25,7 +25,7 @@ EVOLINK_API_KEY > IDEOGRAM_API_KEY > GEMINI_PROXY_API_KEY > OPENAI_API_KEY
 常用命令:
 
 ```bash
-python3 scripts/generate_image.py --account main --prompt "A hand-drawn AI infographic" --image ./images/01.png
+python3 scripts/generate_image.py --prompt "A hand-drawn AI infographic" --image ./images/01.png
 python3 scripts/generate_image.py --image out.png --print-command
 ```
 

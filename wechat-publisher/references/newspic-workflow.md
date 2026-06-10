@@ -21,7 +21,7 @@ brief.md -> newspic_build.py -> card_plan.json -> images/01.png... -> publish.py
 ---
 topic: "Claude Code /rewind 命令"
 title: "Claude Code 里,最有用的命令之一"
-account: main
+# account: <account>
 ---
 
 # 要点
