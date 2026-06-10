@@ -1,7 +1,7 @@
 ---
 name: github-trending-report
 description: "生成 GitHub Trending 中文趋势报告，支持日报、周报、月报；抓取榜单项目并输出面向公众号或 Markdown 的分析文章。"
-version: 1.2.0
+version: 1.3.0
 tags: [github, trending, daily, weekly, monthly, report, blog, wechat, analysis]
 ---
 
@@ -285,6 +285,15 @@ tags: [github, trending, daily, weekly, monthly, report, blog, wechat, analysis]
 }
 ```
 
+### 定时任务故障恢复
+
+定时任务可能因浏览器管道断开而失败，报 `RuntimeError: Broken pipe`。恢复流程：
+
+1. 用 `cronjob(action='list')` 确认 last_status 是否为 error
+2. 在 cron 日志目录读取错误详情（`~/.hermes/cron/output/{job_id}/`）
+3. 在当前会话中按 skill 完整流程手动重跑一次即可
+4. 数据提取推荐用 `browser_console` 的 IIFE + `expression` 参数一次性提取全部项目（见 `references/manual-extraction.md`），比一步步操作更高效
+
 ### 手动测试周报/月报（重要）
 
 不要依赖 `cronjob(action='run')` 来验证定时任务——实测发现它不会立即执行任务。正确的测试方式是在当前会话中按 skill 流程手动跑一遍：
@@ -305,6 +314,7 @@ tags: [github, trending, daily, weekly, monthly, report, blog, wechat, analysis]
 - `assets/themes/github-trending.json` - 本地公众号排版主题。
 - `assets/covers/{daily|weekly|monthly}.png` - 日报、周报、月报封面 base 图。
 - `references/wechat-draft-publish.md` - 发布到微信公众号草稿箱的补充说明。
+- `references/manual-extraction.md` - 一次性 browser_console 提取技巧（cron 故障恢复时用）。
 - `config.yaml.example` - 本 skill 的公众号账号配置示例；真实配置为 `config.yaml`。
 - `{report.output_root}/{period}/trending_{period}_{日期}.md` - 生成的报告文件。
 - `{report.output_root}/{period}/cover_{period}_{日期}.png` - 可选封面图。
@@ -348,3 +358,5 @@ tags: [github, trending, daily, weekly, monthly, report, blog, wechat, analysis]
 5. **项目数量不要注水**：质量优先；精选时在开头说明覆盖范围。
 6. **发布后要预览草稿箱**：确认标题、摘要、分段和封面显示正常后再手动群发。
 7. **Token 40001 错误**：微信普通 token 接口 `/cgi-bin/token` 返回的 token 可能被后续请求踢掉，报 `invalid credential, access_token is invalid or not latest`。`scripts/wechat_token.py` 已改用稳定接口 `/cgi-bin/stable_token`（POST + JSON body 方式调用），避免 token 间互相失效。如果仍然 40001，检查旧缓存文件 `.token_cache_*.json` 是否残留了老接口获取的 token——把 `expires_at` 改为 0 强制刷新即可。
+8. **Cron 浏览器 Broken pipe 失败**：cron 运行环境中 browser 工具可能因管道断开失败，报 `RuntimeError: Broken pipe`。这是已知的 cron 环境限制，不影响手动执行。恢复方式见「定时任务故障恢复」章节。不要因为这个错误就认为 browser 工具不可用——它在手动会话中正常工作。
+9. **提取时总星数和当日星数容易混淆**：GitHub Trending 页面上总星数和每日增量都在链接文本中。`browser_console` 提取时注意区分：总星数在 `a[href*=\"stargazers\"]` 中，当日增量在 `article.textContent` 中匹配 `{数字} stars today`。正则表达式 `article.textContent.match(/([\d,]+)\s*stars?\s*today/i)` 只匹配今日增量。
