@@ -9,6 +9,7 @@
 | Skill | 路径 | 用途 |
 |-------|------|------|
 | GitHub Trending Report | `github-trending-report/` | 生成 GitHub Trending 中文趋势报告，支持日报、周报、月报，并可发布到微信公众号草稿箱。 |
+| WeChat Publisher | `wechat-publisher/` | 将话题、资料或 Markdown 整理成微信公众号文章，支持写作改写、配图、微信 HTML 排版、AI 味自检、草稿箱发布和贴图 newspic。 |
 
 ## Skill 使用说明
 
@@ -108,6 +109,110 @@ python3 scripts/publish.py \
   --digest "本期 top3 项目摘要"
 ```
 
+### WeChat Publisher
+
+路径：`wechat-publisher/`
+
+用途：
+
+- 根据话题、参考文章、文档、网页或现成 Markdown 生成公众号文章。
+- 支持普通图文 `news` 和贴图/图片消息 `newspic` 两种发布形态。
+- 支持信息搜索整理、写作、人味化改写、封面与正文配图生成。
+- 支持 Markdown 转微信公众号内联 HTML 排版。
+- 发布前执行 AI 味自检，默认发布到微信公众号草稿箱。
+- 可选同步到知乎、掘金、CSDN 等平台，默认不启用。
+
+适用 agent 能力：
+
+| 能力 | 是否需要 | 说明 |
+|------|----------|------|
+| 文本生成 | 必需 | 用于需求整理、资料改写、文章写作、人味化改写和标题摘要生成。 |
+| 浏览器或网页搜索 | 视任务需要 | 用于补充最新资料、核实事实和收集真人语料；用户提供完整定稿时可缩短。 |
+| 文件读写 | 必需 | 用于读取配置、保存 `brief.md`、`research.md`、`article.md`、HTML、图片和发布产物。 |
+| 终端执行 | 必需 | 用于运行发布、排版、生图、AI 自检和账号检查脚本。 |
+| 生图后端 | 配图时需要 | 用于生成封面、正文配图或 newspic 图片；也可以复用用户提供的图片。 |
+| 微信公众号 API | 发布时需要 | 发布到草稿箱时需要 `app_id`、`app_secret`、微信 API 网络访问和 IP 白名单。 |
+| 多平台同步配置 | 可选 | 只有用户显式要求同步到其他平台时才需要。 |
+
+配置文件：
+
+```text
+wechat-publisher/
+├── config.yaml.example   # 示例配置，提交到仓库
+└── config.yaml           # 真实配置，本地使用，不提交
+```
+
+首次发布前复制示例配置：
+
+```bash
+cp wechat-publisher/config.yaml.example wechat-publisher/config.yaml
+```
+
+`config.yaml` 常用字段：
+
+| 字段 | 必需 | 说明 |
+|------|------|------|
+| `default` | 是 | 默认使用的公众号账号 key。 |
+| `accounts.<key>.app_id` | 发布时必需 | 微信公众号 AppID。 |
+| `accounts.<key>.app_secret` | 发布时必需 | 微信公众号 AppSecret。 |
+| `accounts.<key>.author` | 否 | 发布文章时使用的作者名。 |
+| `accounts.<key>.theme` | 否 | 公众号排版主题名，对应 `assets/themes/<theme>.json`。 |
+| `accounts.<key>.image_style` | 配图时可选 | 普通图文默认配图风格。 |
+| `accounts.<key>.newspic_image_style` | 贴图时可选 | newspic 默认贴图风格。 |
+| `accounts.<key>.voice` | 否 | 当前账号的写作语气和风格约束。 |
+| `accounts.<key>.sync_platforms` | 多平台同步时可选 | 默认同步平台列表。 |
+| `output_dir` | 否 | 输出目录。 |
+| `image_generation.*` | 配图时需要 | 生图 provider、模型、密钥等配置。 |
+| `integrations.wechatsync_mcp_token` | 多平台同步时需要 | WeChatSync MCP token。 |
+
+发布到微信公众号草稿箱时，需要满足：
+
+- `config.yaml` 存在。
+- 目标账号的 `app_id` 和 `app_secret` 已替换为真实值。
+- 微信公众平台已把当前运行机器公网 IP 加入 API 白名单。
+- 普通图文有封面图，或允许流程生成封面。
+
+后端与资源说明：
+
+- 主发布入口：`scripts/publish.py`。
+- 微信接口：`scripts/wechat_api.py`。
+- 排版转换：`scripts/html_converter.py`，主题资源位于 `assets/themes/`。
+- AI 味自检：`scripts/ai_score.py`，发布入口默认会执行 gate。
+- 生图入口：`scripts/generate_image.py`，图片风格资源位于 `assets/image-styles/`。
+- newspic 入口：`scripts/newspic_build.py`。
+- 多平台同步入口：`scripts/multi_publish.py`。
+
+典型用法：
+
+```text
+使用 wechat-publisher 写一篇关于“大模型 Agent 最新进展”的公众号文章，并发布到草稿箱。
+```
+
+```text
+使用 wechat-publisher 把这份 Markdown 改写成公众号文章，保留我的观点，补封面和配图。
+```
+
+```text
+使用 wechat-publisher 做一组 newspic 贴图，主题是“AI 产品经理的一周工作流”。
+```
+
+手动发布已有 Markdown：
+
+```bash
+cd wechat-publisher
+python3 scripts/publish.py \
+  --input /path/to/article.md \
+  --cover /path/to/cover.jpg \
+  --title "文章标题"
+```
+
+手动发布 newspic：
+
+```bash
+cd wechat-publisher
+python3 scripts/publish.py --type newspic --brief /path/to/brief.md
+```
+
 ## 目录约定
 
 当前仓库直接把 skill 放在根目录：
@@ -116,7 +221,13 @@ python3 scripts/publish.py \
 skill-workshop/
 ├── README.md
 ├── .gitignore
-└── github-trending-report/
+├── github-trending-report/
+│   ├── SKILL.md
+│   ├── config.yaml.example
+│   ├── references/
+│   ├── scripts/
+│   └── assets/
+└── wechat-publisher/
     ├── SKILL.md
     ├── config.yaml.example
     ├── references/
@@ -132,6 +243,7 @@ skill-workshop/
 ├── .gitignore
 └── skills/
     ├── github-trending-report/
+    ├── wechat-publisher/
     └── another-skill/
 ```
 
@@ -155,6 +267,8 @@ skill-name/
 
 ```bash
 cp github-trending-report/config.yaml.example github-trending-report/config.yaml
+# 或：
+cp wechat-publisher/config.yaml.example wechat-publisher/config.yaml
 ```
 
 然后在 `config.yaml` 中填入本地真实值。
