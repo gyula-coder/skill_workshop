@@ -100,6 +100,15 @@ DEFAULT_LIST_STYLE = {
 }
 
 
+def strip_front_matter(markdown_text):
+    """Remove leading YAML front matter before rendering article body."""
+    if markdown_text.lstrip().startswith("---"):
+        m = re.match(r"^\s*---\s*\n(.*?)\n---\s*\n", markdown_text, flags=re.DOTALL)
+        if m:
+            return markdown_text[m.end():]
+    return markdown_text
+
+
 def _themes_dir():
     return Path(__file__).parent.parent / "assets" / "themes"
 
@@ -224,6 +233,7 @@ def convert_markdown_to_wechat_html(
     if list_style is None:
         list_style = DEFAULT_LIST_STYLE.copy()
 
+    markdown_text = strip_front_matter(markdown_text)
     lines = markdown_text.split("\n")
     html_parts = []
     in_code_block = False

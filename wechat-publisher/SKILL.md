@@ -12,14 +12,15 @@ description: |
 
 # 微信公众号文章自动创作与发布
 
-这个 skill 的核心不是“单个发布命令”，而是一个从素材到草稿箱的 **7 阶段工作流**。  
-`SKILL.md` 保留主流程、决策点和最少必要规则；详细模板、风格库、AI 清单、主题与脚本参数下沉到 `references/` 按需读取。
+这个 skill 的核心不是“单个发布命令”，而是把素材变成微信公众号草稿。  
+它有两条并列发布形态:`news` 普通图文文章和 `newspic` 贴图/图片消息。
+`SKILL.md` 保留流程、决策点和最少必要规则；详细模板、风格库、AI 清单、主题与脚本参数下沉到 `references/` 按需读取。
 
 默认目标是**发布到微信公众号草稿箱**。  
 多平台同步是可选扩展阶段，默认不进行，只有用户显式要求时才进入阶段七。
 
 如果用户最终目标是“发到公众号”，默认你要推进到**可发布**状态，而不是只停在建议。  
-这个 skill 不做“任务类型分流”作为入口，统一都从**阶段一:理解需求与收集素材**开始。
+这个 skill 不做“任务类型分流”作为入口，统一都先理解需求与收集素材，再决定走 `news` 还是 `newspic`。
 
 ## 前置检查
 
@@ -69,7 +70,12 @@ python3 -c "from scripts.wechat_api import get_access_token; print(get_access_to
 
 写作时必须使用当前账号的 `voice`，不要在文档或代码里额外硬编码账号人格。
 
-## 阶段输入输出总览
+## 发布形态与输入输出总览
+
+- `news`: 普通公众号图文文章，走 7 阶段文章流程。
+- `newspic`: 贴图/图片消息，走贴图流程，与 `news` 并列，不是 `news` 的子流程。
+
+下面表格是普通图文 `news` 的 7 阶段:
 
 | 阶段 | 输入 | 输出 |
 |---|---|---|
@@ -77,16 +83,16 @@ python3 -c "from scripts.wechat_api import get_access_token; print(get_access_to
 | 阶段二:全网信息搜索与整理 | `brief.md`、已有资料、待核实事实 | `research.md` 或事实与语料清单 |
 | 阶段三:撰写骨架稿 | `brief.md`、`research.md`、账号 `voice` | 第一版完整 Markdown |
 | 阶段 3.5:人味化改写 | Markdown 初稿、账号 `voice`、人味化清单 | 人味化后的 Markdown |
-| 阶段四:生成配图 | Markdown / `brief.md`、账号图片风格、图片 prompt | 封面、正文配图或 newspic 图片 |
+| 阶段四:生成配图 | Markdown、账号图片风格、图片 prompt | `image_plan.md`、封面和正文配图 |
 | 阶段五:转换微信排版 | Markdown、账号 `theme`、图片映射 | 微信可用的内联 HTML |
-| 阶段 5.5:AI 味自检 gate | 待发布 Markdown 或 newspic 短文本 | AI 检测结果；通过则继续，失败则回到阶段 3.5 |
+| 阶段 5.5:AI 味自检 gate | 待发布 Markdown | AI 检测结果；通过则继续，失败则回到阶段 3.5 |
 | 阶段六:发布到草稿箱 | Markdown/HTML、封面、标题摘要、账号配置 | 微信草稿 `media_id` |
 | 阶段七:多平台同步(可选) | 已发布草稿对应内容、同步平台配置 | 各平台同步结果 |
 
-普通图文主链路:用户需求 -> `brief.md` -> `research.md` -> `article.md` -> 配图 -> HTML -> AI gate -> 微信草稿。  
-贴图 `newspic` 主链路:用户需求 -> `brief.md` -> `card_plan.json` -> `images/` -> 短文本 AI gate -> 微信贴图草稿。
+普通图文 `news` 链路:用户需求 -> `brief.md` -> `research.md` -> `article.md` -> 配图 -> HTML -> AI gate -> 微信草稿。  
+贴图 `newspic` 链路:用户需求 -> `brief.md` -> `card_plan.json` -> `images/` -> 短文本 AI gate -> 微信贴图草稿。
 
-## 7 阶段主流程
+## 普通图文 news:7 阶段流程
 
 ### 阶段一:理解需求与收集素材
 
@@ -98,7 +104,7 @@ python3 -c "from scripts.wechat_api import get_access_token; print(get_access_to
 2. 确认目标账号、受众、文章目的
 3. 追问或提取具体事实:人名、时间、金额、版本号、真实经历、踩坑细节
 4. 确认用户当前已经有什么:话题、资料、Markdown、HTML、或 `brief.md`
-5. 约定本篇是长图文 `news` 还是贴图 `newspic`
+5. 约定发布形态:普通图文 `news` 或贴图 `newspic`
 
 产物建议:
 
@@ -160,16 +166,19 @@ python3 -c "from scripts.wechat_api import get_access_token; print(get_access_to
 
 ### 阶段四:生成配图
 
-目标:给文章或贴图生成风格统一的图片。
+目标:给普通图文文章生成风格统一的封面和正文配图。
 
 如果用户已经提供可用封面或配图,先检查是否能直接复用,再决定是否重生。
 
 默认原则:
 
-1. 普通图文用账号 `image_style`
-2. 贴图 newspic 用账号 `newspic_image_style`
-3. 不指定时走配置默认,再走全局兜底
+1. 普通图文用账号配置字段 `image_style` 的值
+2. 不指定时走配置默认,再走全局兜底
+3. 先产出 `image_plan.md`,规划封面和正文配图位置,再把正文图片引用写回 `article.md`
 4. 优先用项目内置 `scripts/generate_image.py`
+5. 如果 AI 生图中文字、结构或信息准确性很差,可以改用本地脚本绘制可控信息图
+
+注意: 普通图文的 `article.md` 默认不要写 YAML frontmatter。标题、作者、摘要、主题、封面、配图风格优先来自发布参数和账号配置；如需记录这些信息,写入 `brief.md` 或 `image_plan.md`,不要放进正文 Markdown。
 
 常用命令:
 
@@ -225,7 +234,7 @@ python3 scripts/publish.py --input article.md --cover cover.jpg --title "标题"
 
 ### 阶段六:发布到草稿箱
 
-目标:把文章或贴图发到微信公众号草稿箱。  
+目标:把普通图文文章发到微信公众号草稿箱。  
 默认是草稿，不自动群发。
 
 最常用入口:
@@ -272,9 +281,18 @@ python3 scripts/publish.py --input article.md --cover cover.jpg --sync-from-conf
 
 - [references/stage-7-multi-publish.md](./references/stage-7-multi-publish.md)
 
-## newspic 子流程
+## 贴图 newspic:并列流程
 
 `newspic` 是与普通图文 `news` 并列的第二种发布形态，适合卡片墙、观点串、图片清单。
+
+输入输出:
+
+| 步骤 | 输入 | 输出 |
+|---|---|---|
+| 需求整理 | 用户话题、参考资料、目标账号、贴图诉求 | `brief.md` |
+| 卡片规划 | `brief.md`、账号 `newspic_image_style` | `card_plan.json` |
+| 生成贴图 | `card_plan.json`、图片风格、图片 prompt | `images/01.png` 等贴图 |
+| 发布草稿 | `brief.md`、`images/`、账号配置 | 微信贴图草稿 `media_id` |
 
 最小流程:
 
@@ -282,6 +300,8 @@ python3 scripts/publish.py --input article.md --cover cover.jpg --sync-from-conf
 2. `python3 scripts/newspic_build.py brief.md`
 3. 按 `card_plan.json` 生图到 `images/`
 4. `python3 scripts/publish.py --type newspic --brief brief.md`
+
+`newspic` 当前不走阶段七多平台同步。
 
 更细的 `brief.md` 格式、卡片规则和限制,读:
 

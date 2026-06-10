@@ -9,3 +9,6 @@ skills/**/config.yaml
 # Python cache
 __pycache__/
 *.py[cod]
+
+# output
+output

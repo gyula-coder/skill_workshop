@@ -37,7 +37,7 @@ from wechat_api import (
     resolve_image_style,
     list_image_styles,
 )
-from html_converter import convert_markdown_to_wechat_html, load_styles, load_theme
+from html_converter import convert_markdown_to_wechat_html, load_styles, load_theme, strip_front_matter
 from image_handler import process_article_images
 
 
@@ -78,12 +78,7 @@ def _strip_inline_markers(text: str) -> str:
 
 def _strip_front_matter(md_content: str) -> str:
     """如果文章以 YAML front matter(--- ... ---)开头,去掉整段 front matter。"""
-    if md_content.lstrip().startswith("---"):
-        # 找到起始 `---` 后的第二个 `---` 行
-        m = re.match(r"^\s*---\s*\n(.*?)\n---\s*\n", md_content, flags=re.DOTALL)
-        if m:
-            return md_content[m.end():]
-    return md_content
+    return strip_front_matter(md_content)
 
 
 def extract_title_from_markdown(md_content):
@@ -229,6 +224,7 @@ def publish_from_markdown(
 
     with open(md_path, "r", encoding="utf-8") as f:
         md_content = f.read()
+    article_body = _strip_front_matter(md_content)
 
     print(f"读取文章：{md_path} ({len(md_content)} 字符)")
 
@@ -243,7 +239,7 @@ def publish_from_markdown(
             # 使用 ai_score.DEFAULT_THRESHOLD 作为默认值，保证 CLI 与库行为一致
             _threshold = ai_score_threshold if ai_score_threshold is not None else _DEFAULT_THRESHOLD
             print("\n[预检] AI 味检测...")
-            passed, report = check_ai_score(md_content, _threshold)
+            passed, report = check_ai_score(article_body, _threshold)
             total = report.get("total_score")
             print(f"  总分: {total} / 100  (阈值 {_threshold})")
             if not passed:
@@ -291,7 +287,7 @@ def publish_from_markdown(
     # 5. 处理图片
     print("\n[步骤2] 处理文章图片...")
     # 移除标题后处理（标题不包含在正文中）
-    content_md = remove_title_from_content(md_content)
+    content_md = remove_title_from_content(article_body)
     processed_md, img_mapping, first_img = process_article_images(content_md, temp_dir)
 
     # 6. 转换HTML
